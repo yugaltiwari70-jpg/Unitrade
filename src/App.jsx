@@ -1,2843 +1,876 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./App.css";
-const initialProducts = [
-  {
-    id: 1,
-    icon: "📘",
-    category: "Books",
-    title: "C Programming Book",
-    description: "Complete C programming book for engineering students.",
-    condition: "Good",
-    price: "₹250",
-    seller: "Rahul",
-    location: "Campus Library",
-    phone: "9876543210",
-    email: "rahul@college.edu",
-  },
-  {
-    id: 2,
-    icon: "📐",
-    category: "Graphics",
-    title: "Engineering Graphics Kit",
-    description: "Complete graphics kit with instruments for engineering drawing.",
-    condition: "Like New",
-    price: "₹350",
-    seller: "Aman",
-    location: "Block A",
-    phone: "9876543211",
-    email: "aman@college.edu",
-  },
-  {
-    id: 3,
-    icon: "🧪",
-    category: "Lab Equipment",
-    title: "Chemistry Lab Coat",
-    description: "Clean lab coat suitable for college practical sessions.",
-    condition: "Good",
-    price: "₹180",
-    seller: "Priya",
-    location: "Science Block",
-    phone: "9876543212",
-    email: "priya@college.edu",
-  },
-  {
-    id: 4,
-    icon: "📝",
-    category: "Notes",
-    title: "Engineering Maths Notes",
-    description: "Student-made notes covering important engineering mathematics topics.",
-    condition: "Excellent",
-    price: "Free",
-    seller: "Yugal",
-    location: "Hostel",
-    phone: "9876543213",
-    email: "yugal@college.edu",
-  },
+
+const seedProducts = [
+  { id: 1, title: "C Programming Book", category: "Books", icon: "📘", price: 250, condition: "Good", seller: "Rahul", verified: true, location: "Campus Library", image: "" },
+  { id: 2, title: "Engineering Graphics Kit", category: "Lab Equipment", icon: "📐", price: 350, condition: "Like New", seller: "Aman", verified: true, location: "Block A", image: "" },
+  { id: 3, title: "Chemistry Lab Coat", category: "Lab Equipment", icon: "🧪", price: 180, condition: "Good", seller: "Priya", verified: true, location: "Science Block", image: "" },
+  { id: 4, title: "Engineering Maths Notes", category: "Notes", icon: "📝", price: 0, condition: "Excellent", seller: "Yugal", verified: true, location: "Hostel", image: "" },
 ];
 
-const resources = [
-  { icon: "📄", title: "Previous Year Papers", count: "120+ papers" },
-  { icon: "📝", title: "Handwritten Notes", count: "85+ resources" },
-  { icon: "🧪", title: "Lab Manuals", count: "40+ manuals" },
+const seedNotes = [
+  { id: 1, title: "Engineering Mathematics-II Complete Notes", subject: "Mathematics", semester: "2nd", author: "Dr. Mehta", authorType: "Faculty", verified: true, rating: 4.9, downloads: 284, type: "PDF", icon: "📐", fileName: "", image: "", ratings: [] },
+  { id: 2, title: "DBMS Unit-wise Handwritten Notes", subject: "DBMS", semester: "3rd", author: "Aarav Sharma", authorType: "Student • 9.4 CGPA", verified: true, rating: 4.8, downloads: 421, type: "PDF", icon: "🗃️", fileName: "", image: "", ratings: [] },
+  { id: 3, title: "Data Structures & Algorithms", subject: "DSA", semester: "3rd", author: "Dr. Priya", authorType: "Faculty", verified: true, rating: 5, downloads: 198, type: "PDF", icon: "💻", fileName: "", image: "", ratings: [] },
+  { id: 4, title: "Operating Systems Revision Pack", subject: "OS", semester: "4th", author: "Vivek Patel", authorType: "Student • 9.1 CGPA", verified: true, rating: 4.7, downloads: 163, type: "PDF", icon: "⚙️", fileName: "", image: "", ratings: [] },
 ];
 
-const defaultTeammates = [
-  {
-    id: 1,
-    name: "Aarav Sharma",
-    role: "Coder",
-    skills: ["C++", "Python", "DSA"],
-    experience: "3 Hackathons",
-    rating: null,
-    reviews: 0,
-    status: "Available",
-    college: "Amity University",
-    about: "Strong in problem solving and backend logic.",
-    phone: "9876500001",
-    email: "aarav@college.edu",
-    image: "",
-  },
-  {
-    id: 2,
-    name: "Priya Verma",
-    role: "Presenter",
-    skills: ["PPT", "Public Speaking", "Pitching"],
-    experience: "5 Presentations",
-    rating: null,
-    reviews: 0,
-    status: "Available",
-    college: "Amity University",
-    about: "Confident presenter for demos and final pitches.",
-    phone: "9876500002",
-    email: "priya@college.edu",
-    image: "",
-  },
-  {
-    id: 3,
-    name: "Rohan Gupta",
-    role: "Frontend Developer",
-    skills: ["React", "JavaScript", "CSS"],
-    experience: "2 Projects",
-    rating: null,
-    reviews: 0,
-    status: "Available",
-    college: "Amity University",
-    about: "Builds responsive and interactive interfaces.",
-    phone: "9876500003",
-    email: "rohan@college.edu",
-    image: "",
-  },
-  {
-    id: 4,
-    name: "Neha Singh",
-    role: "UI/UX Designer",
-    skills: ["Figma", "UI Design", "Prototyping"],
-    experience: "4 Projects",
-    rating: null,
-    reviews: 0,
-    status: "Busy",
-    college: "Amity University",
-    about: "Designs clean and user-friendly hackathon products.",
-    phone: "9876500004",
-    email: "neha@college.edu",
-    image: "",
-  },
-  {
-    id: 5,
-    name: "Vivek Patel",
-    role: "Data Analyst",
-    skills: ["Python", "Pandas", "SQL"],
-    experience: "2 Hackathons",
-    rating: null,
-    reviews: 0,
-    status: "Available",
-    college: "Amity University",
-    about: "Works on data analysis, dashboards and insights.",
-    phone: "9876500005",
-    email: "vivek@college.edu",
-    image: "",
-  },
-  {
-    id: 6,
-    name: "Kunal Jain",
-    role: "Backend Developer",
-    skills: ["Node.js", "Express", "MongoDB"],
-    experience: "3 Projects",
-    rating: null,
-    reviews: 0,
-    status: "Available",
-    college: "Amity University",
-    about: "Handles APIs, databases and server-side development.",
-    phone: "9876500006",
-    email: "kunal@college.edu",
-    image: "",
-  },
-  {
-    id: 7,
-    name: "Ananya Rao",
-    role: "Documentation",
-    skills: ["Research", "Writing", "Reports"],
-    experience: "6 Projects",
-    rating: null,
-    reviews: 0,
-    status: "Available",
-    college: "Amity University",
-    about: "Creates clear documentation and project reports.",
-    phone: "9876500007",
-    email: "ananya@college.edu",
-    image: "",
-  },
+const seedResources = [
+  { id: 1, title: "DBMS Previous Year Questions 2022–2025", category: "PYQs", subject: "DBMS", type: "PDF", downloads: 342, verified: true, icon: "📄", image: "" },
+  { id: 2, title: "React Interview Preparation Sheet", category: "Cheat Sheets", subject: "Web Development", type: "PDF", downloads: 211, verified: true, icon: "⚛️", image: "" },
+  { id: 3, title: "Data Science Lab Manual", category: "Lab Manuals", subject: "Data Science", type: "PDF", downloads: 187, verified: true, icon: "🧪", image: "" },
+  { id: 4, title: "Hackathon Problem Statement Collection", category: "Career", subject: "Hackathons", type: "DOC", downloads: 129, verified: true, icon: "🏆", image: "" },
 ];
 
-const emptyMember = {
-  name: "",
-  role: "Coder",
-  skills: "",
-  experience: "",
-  college: "",
-  about: "",
-  phone: "",
-  email: "",
-  image: "",
-  status: "Available",
-};
+const seedMembers = [
+  { id: 1, name: "Aarav Sharma", role: "Coder", skills: ["C++", "Python", "DSA"], experience: "3 Hackathons", rating: 4.9, status: "Available", verified: true, about: "Strong in problem solving and backend logic.", image: "" },
+  { id: 2, name: "Priya Verma", role: "Presenter", skills: ["PPT", "Pitching", "Public Speaking"], experience: "5 Presentations", rating: 4.8, status: "Available", verified: true, about: "Confident presenter for demos and final pitches.", image: "" },
+  { id: 3, name: "Rohan Gupta", role: "Frontend Developer", skills: ["React", "JavaScript", "CSS"], experience: "2 Projects", rating: 4.7, status: "Available", verified: true, about: "Builds responsive and interactive interfaces.", image: "" },
+  { id: 4, name: "Neha Singh", role: "UI/UX Designer", skills: ["Figma", "UI Design", "Prototyping"], experience: "4 Projects", rating: 4.9, status: "Busy", verified: true, about: "Designs clean and user-friendly hackathon products.", image: "" },
+  { id: 5, name: "Vivek Patel", role: "Data Analyst", skills: ["Python", "Pandas", "SQL"], experience: "2 Hackathons", rating: 4.8, status: "Available", verified: true, about: "Works on dashboards, analysis and insights.", image: "" },
+  { id: 6, name: "Kunal Jain", role: "Backend Developer", skills: ["Node.js", "Express", "MongoDB"], experience: "3 Projects", rating: 4.8, status: "Available", verified: true, about: "Handles APIs, databases and server-side development.", image: "" },
+];
+
+const roles = ["All Roles", "Coder", "Presenter", "Frontend Developer", "Backend Developer", "Data Analyst", "UI/UX Designer", "Documentation"];
+const noteSubjects = ["All Subjects", "Mathematics", "DBMS", "DSA", "OS", "Data Science"];
+const resourceCategories = ["All Resources", "PYQs", "Cheat Sheets", "Lab Manuals", "Career"];
+
+function readStorage(key, fallback) {
+  try {
+    const value = JSON.parse(localStorage.getItem(key) || "null");
+    return value ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+const API_BASE = "http://localhost:5000/api";
+const API_ORIGIN = API_BASE.replace(/\/api$/, "");
+
+function assetUrl(path) {
+  if (!path) return "";
+  if (/^https?:\/\//i.test(path) || path.startsWith("data:")) return path;
+  return `${API_ORIGIN}${path.startsWith("/") ? "" : "/"}${path}`;
+}
+
+async function apiFetch(endpoint, { method = "GET", token = "", body, formData = false } = {}) {
+  const headers = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+  if (!formData && body !== undefined) headers["Content-Type"] = "application/json";
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    method,
+    headers,
+    body: body === undefined ? undefined : formData ? body : JSON.stringify(body),
+  });
+  let data = {};
+  try { data = await response.json(); } catch { data = {}; }
+  if (!response.ok) {
+    const error = new Error(data.message || `Request failed (${response.status})`);
+    error.status = response.status;
+    throw error;
+  }
+  return data;
+}
+
+async function authRequest(endpoint, payload) {
+  return apiFetch(`/auth/${endpoint}`, { method: "POST", body: payload });
+}
+
+function mapListing(item) {
+  return { ...item, id: item._id || item.id, image: assetUrl(item.image), icon: item.icon || "📦" };
+}
+function mapNote(item) {
+  return { ...item, id: item._id || item.id, author: item.uploader || item.author, image: assetUrl(item.coverImage || item.image), fileName: item.fileName || "", ratings: item.ratings || [] };
+}
+function mapResource(item) {
+  return { ...item, id: item._id || item.id, image: assetUrl(item.image), icon: item.icon || "📚" };
+}
+function mapMember(item) {
+  return { ...item, id: item._id || item.id, image: assetUrl(item.image), skills: Array.isArray(item.skills) ? item.skills : [] };
+}
 
 function App() {
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("unitrade-theme") || "dark";
-  });
-
-  const [products, setProducts] = useState(() => {
-    try {
-      const saved = localStorage.getItem("unitrade-products-v2");
-      return saved ? JSON.parse(saved) : initialProducts;
-    } catch {
-      return initialProducts;
-    }
-  });
-  const [wishlist, setWishlist] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("unitrade-wishlist-v2")) || [];
-    } catch {
-      return [];
-    }
-  });
-  const [selectedProduct, setSelectedProduct] = useState(null);
-
+  const [theme, setTheme] = useState(() => localStorage.getItem("unitrade-theme") || "dark");
+  const [tab, setTab] = useState("home");
+  const [products, setProducts] = useState(() => readStorage("unitrade-products", seedProducts));
+  const [notes, setNotes] = useState(() => readStorage("unitrade-notes", seedNotes));
+  const [resources, setResources] = useState(() => readStorage("unitrade-resources", seedResources));
+  const [members, setMembers] = useState(() => readStorage("unitrade-members", seedMembers));
+  const [wishlist, setWishlist] = useState(() => readStorage("unitrade-wishlist", []));
+  const [user, setUser] = useState(() => readStorage("unitrade-user", null));
+  const [authToken, setAuthToken] = useState(() => localStorage.getItem("unitrade-token") || "");
+  const [authMode, setAuthMode] = useState("login");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [modal, setModal] = useState(null);
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All Categories");
-
-  const [showSell, setShowSell] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
-  const [showWishlist, setShowWishlist] = useState(false);
-  const [showAdmin, setShowAdmin] = useState(false);
-  const [showTeamFinder, setShowTeamFinder] = useState(false);
-
-  const [user, setUser] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("unitrade-user-v2")) || null;
-    } catch {
-      return null;
-    }
-  });
+  const [marketCategory, setMarketCategory] = useState("All");
+  const [noteSearch, setNoteSearch] = useState("");
+  const [resourceSearch, setResourceSearch] = useState("");
+  const [role, setRole] = useState("All Roles");
+  const [noteSubject, setNoteSubject] = useState("All Subjects");
+  const [resourceCategory, setResourceCategory] = useState("All Resources");
   const [toast, setToast] = useState("");
-
-  const [teamRole, setTeamRole] = useState("All Roles");
-  const [teamSearch, setTeamSearch] = useState("");
-  const [selectedTeammate, setSelectedTeammate] = useState(null);
-
-  const [members, setMembers] = useState(() => {
-    try {
-      const saved = localStorage.getItem("unitrade-members-v2");
-      return saved ? JSON.parse(saved) : defaultTeammates;
-    } catch {
-      return defaultTeammates;
-    }
-  });
-  const [showMemberForm, setShowMemberForm] = useState(false);
-  const [memberForm, setMemberForm] = useState(emptyMember);
-  const [memberImagePreview, setMemberImagePreview] = useState("");
-  const [editingMemberId, setEditingMemberId] = useState(null);
-
-  const [invitedMembers, setInvitedMembers] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("unitrade-invites-v2")) || [];
-    } catch {
-      return [];
-    }
-  });
-  const [reviews, setReviews] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("unitrade-reviews-v2")) || {};
-    } catch {
-      return {};
-    }
-  });
-  const [reviewTarget, setReviewTarget] = useState(null);
-  const [reviewStars, setReviewStars] = useState(5);
-  const [reviewText, setReviewText] = useState("");
-
-  const [authMode, setAuthMode] = useState("choice");
-  const [otpStep, setOtpStep] = useState(false);
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState("");
-
-  const [authForm, setAuthForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-  });
-
-  const [form, setForm] = useState({
-    title: "",
-    category: "Books",
-    description: "",
-    condition: "Good",
-    price: "",
-    seller: "",
-    phone: "",
-    email: "",
-    image: "",
-    location: "",
-  });
+  const [profile, setProfile] = useState({ name: "", email: "", phone: "", role: "Coder", skills: "", cgpa: "", college: "", about: "", image: "", imageFile: null });
+  const [listing, setListing] = useState({ title: "", category: "Books", price: "", condition: "Good", location: "", seller: "", image: "", imageFile: null });
+  const [noteForm, setNoteForm] = useState({ title: "", subject: "DBMS", semester: "3rd", authorType: "Student", cgpa: "", college: "", description: "", file: null, image: "" });
+  const [resourceForm, setResourceForm] = useState({ title: "", category: "PYQs", subject: "", type: "PDF", description: "", image: "", imageFile: null });
+  const [noteAccess, setNoteAccess] = useState(() => readStorage("unitrade-note-access", []));
+  const [noteRatings, setNoteRatings] = useState(() => readStorage("unitrade-note-ratings", {}));
 
   useEffect(() => {
+    let cancelled = false;
+    async function bootstrap() {
+      try {
+        const [listingData, noteData, resourceData, teamData] = await Promise.all([
+          apiFetch("/listings"), apiFetch("/notes"), apiFetch("/resources"), apiFetch("/team")
+        ]);
+        if (cancelled) return;
+        const mergeKeepExisting = (existing, incoming, mapper) => {
+          const mapped = Array.isArray(incoming) ? incoming.map(mapper) : [];
+          const incomingKeys = new Set(mapped.map(x => `${x.title || x.name || ""}|${x.subject || x.role || ""}`));
+          const keep = existing.filter(x => !incomingKeys.has(`${x.title || x.name || ""}|${x.subject || x.role || ""}`));
+          return [...mapped, ...keep];
+        };
+        setProducts(prev => mergeKeepExisting(prev.length ? prev : seedProducts, listingData, mapListing));
+        setNotes(prev => mergeKeepExisting(prev.length ? prev : seedNotes, noteData, mapNote));
+        setResources(prev => mergeKeepExisting(prev.length ? prev : seedResources, resourceData, mapResource));
+        setMembers(prev => mergeKeepExisting(prev.length ? prev : seedMembers, teamData, mapMember));
+      } catch (error) {
+        console.warn("UniTrade API bootstrap failed; using local demo data.", error.message);
+      }
+    }
+    bootstrap();
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (!authToken) return;
+    apiFetch("/auth/me", { token: authToken })
+      .then(result => setUser(prev => ({ ...(prev || {}), ...(result.user || {}) })))
+      .catch(error => {
+        // Keep the saved local session when the backend is temporarily offline.
+        // Only clear it when the backend explicitly says the token is invalid.
+        if (error.status === 401 || error.status === 403) {
+          localStorage.removeItem("unitrade-token");
+          setAuthToken("");
+          setUser(null);
+        }
+      });
+  }, [authToken]);
+
+  useEffect(() => {
+    document.body.className = theme === "dark" ? "dark-mode" : "light-mode";
     localStorage.setItem("unitrade-theme", theme);
-    document.body.className = theme === "light" ? "light-mode" : "dark-mode";
   }, [theme]);
-
+  useEffect(() => localStorage.setItem("unitrade-products", JSON.stringify(products)), [products]);
+  useEffect(() => localStorage.setItem("unitrade-notes", JSON.stringify(notes)), [notes]);
+  useEffect(() => localStorage.setItem("unitrade-resources", JSON.stringify(resources)), [resources]);
+  useEffect(() => localStorage.setItem("unitrade-members", JSON.stringify(members)), [members]);
+  useEffect(() => localStorage.setItem("unitrade-wishlist", JSON.stringify(wishlist)), [wishlist]);
+  useEffect(() => localStorage.setItem("unitrade-note-access", JSON.stringify(noteAccess)), [noteAccess]);
+  useEffect(() => localStorage.setItem("unitrade-note-ratings", JSON.stringify(noteRatings)), [noteRatings]);
   useEffect(() => {
-    localStorage.setItem("unitrade-products-v2", JSON.stringify(products));
-  }, [products]);
-
-  useEffect(() => {
-    localStorage.setItem("unitrade-members-v2", JSON.stringify(members));
-  }, [members]);
-
-  useEffect(() => {
-    localStorage.setItem("unitrade-wishlist-v2", JSON.stringify(wishlist));
-  }, [wishlist]);
-
-  useEffect(() => {
-    if (user) localStorage.setItem("unitrade-user-v2", JSON.stringify(user));
-    else localStorage.removeItem("unitrade-user-v2");
+    if (user) localStorage.setItem("unitrade-user", JSON.stringify(user));
+    else localStorage.removeItem("unitrade-user");
   }, [user]);
 
-  useEffect(() => {
-    localStorage.setItem("unitrade-invites-v2", JSON.stringify(invitedMembers));
-  }, [invitedMembers]);
-
-  useEffect(() => {
-    localStorage.setItem("unitrade-reviews-v2", JSON.stringify(reviews));
-  }, [reviews]);
-
-  const toggleTheme = () => {
-    setTheme((current) => (current === "dark" ? "light" : "dark"));
-
-    notify(
-      theme === "dark"
-        ? "Day mode enabled ☀️"
-        : "Dark mode enabled 🌙"
-    );
+  const notify = (msg) => {
+    setToast(msg);
+    window.clearTimeout(window.__ut);
+    window.__ut = window.setTimeout(() => setToast(""), 2600);
   };
 
-  const notify = (message) => {
-    setToast(message);
-    setTimeout(() => setToast(""), 2200);
+  const go = (id) => {
+    setTab(id);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const scrollTo = (id) => {
-    document.getElementById(id)?.scrollIntoView({
-      behavior: "smooth",
-    });
-  };
-
-  const toggleWishlist = (id) => {
-    const exists = wishlist.includes(id);
-
-    setWishlist((current) =>
-      exists
-        ? current.filter((item) => item !== id)
-        : [...current, id]
-    );
-
-    notify(
-      exists
-        ? "Removed from wishlist"
-        : "Added to wishlist ❤️"
-    );
-  };
-
-  const filteredProducts = products.filter((product) => {
-    const text = search.toLowerCase();
-
-    const matchesSearch =
-      product.title.toLowerCase().includes(text) ||
-      product.description.toLowerCase().includes(text) ||
-      product.category.toLowerCase().includes(text);
-
-    const matchesCategory =
-      category === "All Categories" ||
-      product.category === category;
-
-    return matchesSearch && matchesCategory;
-  });
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files?.[0];
-
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      notify("Please select an image file");
-      return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      setForm((current) => ({
-        ...current,
-        image: reader.result,
-      }));
-    };
-
-    reader.readAsDataURL(file);
-  };
-
-  const handleMemberImage = (e) => {
-    const file = e.target.files?.[0];
-
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      notify("Please select an image file");
-      return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      setMemberImagePreview(reader.result);
-
-      setMemberForm((current) => ({
-        ...current,
-        image: reader.result,
-      }));
-    };
-
-    reader.readAsDataURL(file);
-  };
-
-  const handleSell = (e) => {
-    e.preventDefault();
-
-    if (
-      !form.title ||
-      !form.description ||
-      !form.seller ||
-      !form.phone ||
-      !form.email ||
-      !form.image ||
-      !form.location
-    ) {
-      notify("Please fill all required fields");
-      return;
-    }
-
-    const newProduct = {
-      id: Date.now(),
-      ownerEmail: user?.email || form.email,
-      icon:
-        form.category === "Books"
-          ? "📘"
-          : form.category === "Notes"
-          ? "📝"
-          : form.category === "Lab Equipment"
-          ? "🧪"
-          : "📦",
-
-      ...form,
-
-      price: form.price.trim()
-        ? `₹${form.price}`
-        : "Free",
-    };
-
-    setProducts((current) => [
-      newProduct,
-      ...current,
-    ]);
-
-    setForm({
-      title: "",
-      category: "Books",
-      description: "",
-      condition: "Good",
-      price: "",
-      seller: "",
-      phone: "",
-      email: "",
-      image: "",
-      location: "",
-    });
-
-    setShowSell(false);
-
-    notify("Your item has been listed successfully! 🎉");
-
-    setTimeout(() => {
-      scrollTo("marketplace");
-    }, 200);
-  };
-
-  const sendOtp = (e) => {
-    e.preventDefault();
-
-    if (
-      !authForm.name ||
-      !authForm.email ||
-      !authForm.phone
-    ) {
-      notify("Please enter all details");
-      return;
-    }
-
-    const demoOtp = "123456";
-
-    setOtpSent(demoOtp);
-    setOtp("");
-    setOtpStep(true);
-
-    notify("Demo OTP sent. Use 123456");
-  };
-
-  const verifyOtp = (e) => {
-    e.preventDefault();
-
-    if (otp !== otpSent) {
-      notify("Invalid OTP. Use 123456");
-      return;
-    }
-
-    setUser({
-      name: authForm.name,
-      email: authForm.email,
-      phone: authForm.phone,
-    });
-
-    setShowLogin(false);
-    setOtpStep(false);
-    setAuthMode("choice");
-
-    notify(`Welcome to UniTrade, ${authForm.name}! 🎓`);
-  };
-
-  const handleLogin = (e) => {
-    e.preventDefault();
-
-    const name = e.target.name.value.trim();
-    const email = e.target.email.value.trim();
-
-    if (!name || !email) {
-      notify("Please enter name and email");
-      return;
-    }
-
-    setUser({
-      name,
-      email,
-    });
-
-    setShowLogin(false);
-
-    notify(`Welcome back, ${name}! 🎓`);
-  };
-
-  const googleDemoLogin = () => {
-    notify("Google login demo opened");
-    setAuthMode("email");
-  };
-
-  const logout = () => {
-    setUser(null);
-    notify("Logged out successfully");
-  };
-
-  const filteredTeammates = members.filter((person) => {
-    const roleMatch =
-      teamRole === "All Roles" ||
-      person.role === teamRole;
-
-    const text =
-      `${person.name} ${person.role} ${person.skills.join(" ")}`.toLowerCase();
-
-    return (
-      roleMatch &&
-      text.includes(teamSearch.toLowerCase())
-    );
-  });
-
-  const openMemberForm = (member = null) => {
+  const requireLogin = (action) => {
     if (!user) {
-      setShowLogin(true);
-      notify("Create an account first");
-      return;
+      notify("Please login first");
+      setModal("login");
+      return false;
     }
-
-    if (member) {
-      setEditingMemberId(member.id);
-      setMemberForm({
-        name: member.name || "",
-        role: member.role || "Coder",
-        skills: Array.isArray(member.skills) ? member.skills.join(", " ) : "",
-        experience: member.experience || "",
-        college: member.college || "",
-        about: member.about || "",
-        phone: member.phone || "",
-        email: member.email || user.email || "",
-        image: member.image || "",
-        status: member.status || "Available",
-      });
-      setMemberImagePreview(member.image || "");
-    } else {
-      setEditingMemberId(null);
-      // New team member form should always start completely blank.
-      // Existing profile data is loaded only when editing that profile.
-      setMemberForm({ ...emptyMember });
-      setMemberImagePreview("");
-    }
-    setShowMemberForm(true);
+    action?.();
+    return true;
   };
 
-  const addMember = (e) => {
-    e.preventDefault();
+  const filteredProducts = useMemo(
+    () => products.filter(p => {
+      const hay = `${p.title} ${p.category} ${p.seller} ${p.location}`.toLowerCase();
+      return hay.includes(search.toLowerCase()) &&
+        (marketCategory === "All" || p.category === marketCategory);
+    }),
+    [products, search, marketCategory]
+  );
+  const filteredNotes = useMemo(
+    () => notes.filter(n =>
+      `${n.title} ${n.subject} ${n.author}`.toLowerCase().includes(noteSearch.toLowerCase()) &&
+      (noteSubject === "All Subjects" || n.subject === noteSubject)
+    ),
+    [notes, noteSearch, noteSubject]
+  );
+  const filteredResources = useMemo(
+    () => resources.filter(r =>
+      `${r.title} ${r.subject} ${r.category}`.toLowerCase().includes(resourceSearch.toLowerCase()) &&
+      (resourceCategory === "All Resources" || r.category === resourceCategory)
+    ),
+    [resources, resourceSearch, resourceCategory]
+  );
+  const filteredMembers = useMemo(
+    () => members.filter(m =>
+      (role === "All Roles" || m.role === role) &&
+      `${m.name} ${m.role} ${m.skills.join(" ")}`.toLowerCase().includes(search.toLowerCase())
+    ),
+    [members, role, search]
+  );
 
-    if (
-      !memberForm.name ||
-      !memberForm.email ||
-      !memberForm.phone ||
-      !memberForm.skills ||
-      !memberForm.about
-    ) {
-      notify("Please fill name, email, phone, skills and about");
-      return;
+  const submitLogin = async (e) => {
+    e.preventDefault();
+    if (authLoading) return;
+
+    const data = new FormData(e.currentTarget);
+    const name = data.get("name")?.trim();
+    const email = data.get("email")?.trim().toLowerCase();
+    const password = data.get("password");
+    const college = data.get("college")?.trim() || "";
+    const course = data.get("course")?.trim() || "";
+
+    if (!email || !password || (authMode === "register" && !name)) {
+      return notify(authMode === "register" ? "Fill all required sign-up fields" : "Enter email and password");
     }
 
-    const profileData = {
-      name: memberForm.name.trim(),
-      role: memberForm.role,
-      skills: memberForm.skills.split(",").map((s) => s.trim()).filter(Boolean),
-      experience: memberForm.experience || "New to Hackathons",
-      college: memberForm.college || "College Student",
-      status: memberForm.status,
-      phone: memberForm.phone,
-      email: memberForm.email,
-      about: memberForm.about.trim(),
-      image: memberImagePreview || memberForm.image || "",
-    };
-
-    if (editingMemberId !== null) {
-      setMembers((current) =>
-        current.map((member) =>
-          member.id === editingMemberId
-            ? { ...member, ...profileData }
-            : member
-        )
+    try {
+      setAuthLoading(true);
+      const result = await authRequest(authMode === "register" ? "register" : "login",
+        authMode === "register"
+          ? { name, email, password, college, course }
+          : { email, password }
       );
-      setShowMemberForm(false);
-      setEditingMemberId(null);
-      setMemberForm(emptyMember);
-      setMemberImagePreview("");
-      notify("Your team profile was updated successfully! ✨");
-      return;
+
+      localStorage.setItem("unitrade-token", result.token || "");
+      setAuthToken(result.token || "");
+
+      const loggedUser = {
+        ...(result.user || {}),
+        name: result.user?.name || name || "Student",
+        email: result.user?.email || email,
+        college: result.user?.college || college || "Campus",
+        course: result.user?.course || course || "",
+        joined: "2026",
+      };
+
+      localStorage.setItem("unitrade-user", JSON.stringify(loggedUser));
+      setUser(loggedUser);
+      setModal(null);
+      notify(authMode === "register" ? "Account created successfully! 🎓" : `Welcome back, ${loggedUser.name}! 🎓`);
+    } catch (error) {
+      notify(error.message || "Authentication failed");
+    } finally {
+      setAuthLoading(false);
     }
-
-    const newMember = {
-      ...profileData,
-      id: Date.now(),
-      ownerEmail: user?.email,
-      rating: null,
-      reviews: 0,
-    };
-
-    setMembers((current) => [...current, newMember]);
-    setMemberForm(emptyMember);
-    setMemberImagePreview("");
-    setShowMemberForm(false);
-    notify("Team profile added successfully! 🎉");
   };
 
-  const deleteMember = (person) => {
-    if (!user) {
-      setShowLogin(true);
-      notify("Please login before deleting a team profile");
-      return;
-    }
-
-    const confirmed = window.confirm(
-      `Delete ${person.name}'s team profile? This cannot be undone.`
-    );
-    if (!confirmed) return;
-
-    setMembers((current) => current.filter((member) => member.id !== person.id));
-    setInvitedMembers((current) => current.filter((id) => id !== person.id));
-    setReviews((current) => {
-      const next = { ...current };
-      delete next[person.id];
-      return next;
-    });
-    setSelectedTeammate(null);
-    notify("Your team profile was deleted");
+  const readImage = (file, setter, key = "image") => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return notify("Please choose an image file");
+    if (file.size > 5 * 1024 * 1024) return notify("Image must be under 5 MB");
+    const reader = new FileReader();
+    reader.onload = () => setter(prev => ({ ...prev, [key]: reader.result, imageFile: file }));
+    reader.readAsDataURL(file);
   };
 
-  const inviteMember = (person) => {
-    if (!user) {
-      setShowLogin(true);
-      notify("Please login before sending invite");
-      return;
+  const readNoteFile = (file) => {
+    if (!file) return;
+    const allowed = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    if (!allowed.includes(file.type) && !/\.(pdf|doc|docx)$/i.test(file.name)) {
+      return notify("Please choose a PDF, DOC or DOCX file");
     }
-
-    setInvitedMembers((current) =>
-      current.includes(person.id)
-        ? current
-        : [...current, person.id]
-    );
-
-    notify(
-      `Team invite sent to ${person.name}! 🤝`
-    );
+    if (file.size > 15 * 1024 * 1024) return notify("Notes file must be under 15 MB");
+    setNoteForm(prev => ({ ...prev, file }));
   };
 
-  const openReview = (person) => {
-    if (!invitedMembers.includes(person.id)) {
-      notify("Review unlocks after inviting teammate");
-      return;
-    }
-
-    setReviewTarget(person);
-    setReviewStars(5);
-    setReviewText("");
-  };
-
-  const submitReview = (e) => {
+  const addListing = async (e) => {
     e.preventDefault();
-
-    if (!reviewTarget || !reviewText.trim()) {
-      notify("Please write a review");
-      return;
+    if (!authToken) return requireLogin();
+    if (!listing.title || listing.price === "" || !listing.location || !listing.imageFile) {
+      return notify("Fill all required fields and upload item photo 📷");
     }
-
-    const newReview = {
-      id: Date.now(),
-      stars: reviewStars,
-      text: reviewText.trim(),
-      by: user?.name || "Student",
-    };
-
-    setReviews((current) => ({
-      ...current,
-
-      [reviewTarget.id]: [
-        ...(current[reviewTarget.id] || []),
-        newReview,
-      ],
-    }));
-
-    setMembers((current) =>
-      current.map((member) => {
-        if (member.id !== reviewTarget.id) {
-          return member;
-        }
-
-        const previousReviews = reviews[member.id] || [];
-        const allRatings = [
-          ...previousReviews.map((review) => review.stars),
-          reviewStars,
-        ];
-        const average =
-          allRatings.reduce((sum, rating) => sum + rating, 0) / allRatings.length;
-
-        return {
-          ...member,
-          rating: Number(average.toFixed(1)),
-          reviews: (member.reviews || 0) + 1,
-        };
-      })
-    );
-
-    setReviewTarget(null);
-
-    notify("Review submitted successfully! ⭐");
+    try {
+      const body = new FormData();
+      ["title", "category", "price", "condition", "location", "seller"].forEach(k => body.append(k, listing[k] ?? ""));
+      body.append("image", listing.imageFile);
+      const created = await apiFetch("/listings", { method: "POST", token: authToken, body, formData: true });
+      setProducts(p => [mapListing(created), ...p]);
+      setListing({ title: "", category: "Books", price: "", condition: "Good", location: "", seller: "", image: "", imageFile: null });
+      setModal(null);
+      notify("Listing saved to UniTrade backend ✓");
+    } catch (error) {
+      // If the backend is temporarily unavailable, keep the listing in this browser
+      // so the Publish Listing button still works during a demo/development run.
+      const localListing = {
+        id: `local-${Date.now()}`,
+        title: listing.title,
+        category: listing.category,
+        icon: "📦",
+        price: Number(listing.price),
+        condition: listing.condition,
+        seller: listing.seller || user?.name || "Student",
+        verified: true,
+        location: listing.location,
+        image: listing.image || "",
+      };
+      setProducts(p => [localListing, ...p]);
+      setListing({ title: "", category: "Books", price: "", condition: "Good", location: "", seller: "", image: "", imageFile: null });
+      setModal(null);
+      notify(`Listing saved locally. Backend unavailable right now.`);
+    }
+  };
+  const addNote = async (e) => {
+    e.preventDefault();
+    if (!authToken) return requireLogin();
+    if (!noteForm.title || !noteForm.college || !noteForm.description || !noteForm.file || !noteForm.imageFile) {
+      return notify("Complete note details, choose the notes file and upload cover photo 📷");
+    }
+    if (noteForm.authorType === "Student" && Number(noteForm.cgpa) < 9) {
+      return notify("Only students with 9.0+ CGPA can submit verified notes");
+    }
+    try {
+      const body = new FormData();
+      ["title", "subject", "semester", "authorType", "cgpa", "college", "description"].forEach(k => body.append(k, noteForm[k] ?? ""));
+      body.append("document", noteForm.file);
+      body.append("coverImage", noteForm.imageFile);
+      const created = await apiFetch("/notes/upload", { method: "POST", token: authToken, body, formData: true });
+      setNotes(n => [mapNote(created), ...n]);
+      setNoteForm({ title: "", subject: "DBMS", semester: "3rd", authorType: "Student", cgpa: "", college: "", description: "", file: null, image: "", imageFile: null });
+      setModal(null);
+      notify("Note submitted to backend verification queue ✓");
+    } catch (error) {
+      notify(error.message || "Could not upload note");
+    }
+  };
+  const addResource = async (e) => {
+    e.preventDefault();
+    if (!authToken) return requireLogin();
+    if (!resourceForm.title || !resourceForm.subject || !resourceForm.description || !resourceForm.imageFile) {
+      return notify("Complete resource details and upload resource photo 📷");
+    }
+    try {
+      const body = new FormData();
+      ["title", "category", "subject", "type", "description"].forEach(k => body.append(k, resourceForm[k] ?? ""));
+      body.append("image", resourceForm.imageFile);
+      const created = await apiFetch("/resources", { method: "POST", token: authToken, body, formData: true });
+      setResources(r => [mapResource(created), ...r]);
+      setResourceForm({ title: "", category: "PYQs", subject: "", type: "PDF", description: "", image: "", imageFile: null });
+      setModal(null);
+      notify("Resource saved to backend ✓");
+    } catch (error) {
+      notify(error.message || "Could not add resource");
+    }
+  };
+  const addMember = async (e) => {
+    e.preventDefault();
+    if (!authToken) return requireLogin();
+    if (!profile.name || !profile.skills || !profile.college || !profile.imageFile) {
+      return notify("Complete your team profile and upload profile photo 📷");
+    }
+    try {
+      const body = new FormData();
+      ["name", "role", "college", "about", "phone", "email", "cgpa", "status", "experience"].forEach(k => {
+        const value = k === "status" ? "Available" : k === "experience" ? "New profile" : profile[k] ?? "";
+        body.append(k, value);
+      });
+      body.append("skills", profile.skills);
+      body.append("image", profile.imageFile);
+      const created = await apiFetch("/team", { method: "POST", token: authToken, body, formData: true });
+      setMembers(m => [mapMember(created), ...m]);
+      setProfile({ name: "", email: "", phone: "", role: "Coder", skills: "", cgpa: "", college: "", about: "", image: "", imageFile: null });
+      setModal(null);
+      notify("Team profile saved to backend ✓");
+    } catch (error) {
+      notify(error.message || "Could not publish team profile");
+    }
+  };
+  const accessNote = async (note) => {
+    if (!authToken) return requireLogin();
+    try {
+      if (typeof note.id === "string" && note.id.length >= 20) {
+        const result = await apiFetch(`/notes/${note.id}/access`, { token: authToken });
+        setNoteAccess(a => a.includes(note.id) ? a : [...a, note.id]);
+        setNotes(all => all.map(n => n.id === note.id ? { ...n, downloads: result.downloads ?? ((n.downloads || 0) + 1) } : n));
+        setModal({ type: "noteAccess", data: { ...note, ...result, downloadUrl: assetUrl(result.downloadUrl) } });
+        if (result.downloadUrl) window.open(assetUrl(result.downloadUrl), "_blank", "noopener,noreferrer");
+        notify("Verified note access granted ✓");
+      } else {
+        setNoteAccess(a => a.includes(note.id) ? a : [...a, note.id]);
+        setNotes(all => all.map(n => n.id === note.id ? { ...n, downloads: (n.downloads || 0) + 1 } : n));
+        setModal({ type: "noteAccess", data: note });
+        notify(note.fileName ? `Demo access opened: ${note.fileName}` : `Demo access opened: ${note.title}`);
+      }
+    } catch (error) {
+      notify(error.message || "Could not access note");
+    }
   };
 
-  const memberReviews = reviewTarget
-    ? reviews[reviewTarget.id] || []
-    : [];
+  const submitNoteRating = async (note, rating) => {
+    if (!authToken) return requireLogin();
+    if (!noteAccess.includes(note.id)) return notify("Access the note before rating it");
+    if (!rating) return notify("Please select a rating");
+    try {
+      if (typeof note.id === "string" && note.id.length >= 20) {
+        const result = await apiFetch(`/notes/${note.id}/rate`, { method: "POST", token: authToken, body: { rating: Number(rating) } });
+        setNotes(all => all.map(n => n.id === note.id ? { ...n, rating: result.rating, ratingsCount: result.ratingsCount } : n));
+      } else {
+        const key = `${user?.email}:${note.id}`;
+        if (noteRatings[key]) return notify("You have already rated this note");
+        setNoteRatings(r => ({ ...r, [key]: Number(rating) }));
+        setNotes(all => all.map(n => {
+          if (n.id !== note.id) return n;
+          const previous = Array.isArray(n.ratings) ? n.ratings : [];
+          const next = [...previous, Number(rating)];
+          return { ...n, ratings: next, rating: Number((next.reduce((a, b) => a + b, 0) / next.length).toFixed(1)) };
+        }));
+      }
+      notify("Thanks! Your note rating was submitted ⭐");
+      setModal(null);
+    } catch (error) {
+      notify(error.message || "Could not submit rating");
+    }
+  };
+  const download = (label) => notify(`Demo download started: ${label}`);
+  const toggleWish = (id) => setWishlist(w => w.includes(id) ? w.filter(x => x !== id) : [...w, id]);
 
-  const roleButtons = [
-    ["💻", "Coder"],
-    ["🎤", "Presenter"],
-    ["🎨", "Frontend Developer"],
-    ["⚙️", "Backend Developer"],
-    ["📊", "Data Analyst"],
-    ["🖌️", "UI/UX Designer"],
-    ["📝", "Documentation"],
+  const nav = [
+    ["home", "Home"],
+    ["marketplace", "Marketplace"],
+    ["notes", "Verified Notes"],
+    ["resources", "Resources"],
+    ["team", "Team Finder"],
+    ["ai", "🤖 AI Center"],
+    ["business", "💼 Business"],
+    ["dashboard", "Dashboard"],
   ];
 
   return (
-    <div className={`app ${theme}`}>
-
-      {/* NAVBAR */}
+    <div className="app">
       <nav className="navbar">
-
-        <div
-          className="logo"
-          onClick={() => scrollTo("home")}
-        >
-          <span className="logo-mark">♻</span>
-          UniTrade
-        </div>
-
+        <button className="brand" onClick={() => go("home")}><span>♻</span><b>UniTrade</b></button>
         <div className="nav-links">
-          <a href="#home">Home</a>
-          <a href="#marketplace">Marketplace</a>
-          <a href="#resources">Notes & PYQs</a>
-          <a href="#team-finder">🤝 Team Finder</a>
-          <a href="#how">How It Works</a>
-          <a href="#about">About</a>
+          {nav.map(([id, label]) => (
+            <button key={id} className={tab === id ? "active" : ""} onClick={() => go(id)}>{label}</button>
+          ))}
         </div>
-
         <div className="nav-actions">
-
-          <button
-            className="theme-btn"
-            onClick={toggleTheme}
-            title="Toggle Day/Night Mode"
-          >
-            {theme === "dark" ? "☀️ Day" : "🌙 Night"}
-          </button>
-
-          <button
-            className="admin-nav"
-            onClick={() => setShowAdmin(true)}
-          >
-            ⚙️ Admin
-          </button>
-
-          <button
-            className="wishlist-nav"
-            onClick={() => setShowWishlist(true)}
-          >
-            ❤️ {wishlist.length}
-          </button>
-
-          {user ? (
-            <button
-              className="login-btn"
-              onClick={logout}
-            >
-              {user.name} · Logout
-            </button>
-          ) : (
-            <button
-              className="login-btn"
-              onClick={() => {
-                setAuthMode("choice");
-                setOtpStep(false);
-                setShowLogin(true);
-              }}
-            >
-              Sign Up / Login
-            </button>
-          )}
-
+          <button className="icon-btn" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>{theme === "dark" ? "☀️" : "🌙"}</button>
+          <button className="icon-btn" onClick={() => setModal("wishlist")}>♡ {wishlist.length}</button>
+          {user
+            ? <button className="login-btn" onClick={() => {
+                setUser(null);
+                setAuthToken("");
+                localStorage.removeItem("unitrade-token");
+                localStorage.removeItem("unitrade-user");
+                notify("Logged out");
+              }}>Logout</button>
+            : <button className="login-btn" onClick={() => { setAuthMode("login"); setModal("login"); }}>Login / Sign Up</button>}
         </div>
       </nav>
 
-      {/* HERO */}
-      <section className="hero" id="home">
-
-        <div className="hero-content">
-
-          <div className="badge">
-            🎓 STUDENT-ONLY MARKETPLACE
-          </div>
-
-          <h1>
-            Buy Smart.
-            <br />
-            <span>Sell Smart.</span>
-            <br />
-            Reuse Smart.
-          </h1>
-
-          <p>
-            UniTrade connects students to buy and sell
-            used academic materials within their campus.
-            Save money, reduce waste and help fellow
-            students.
-          </p>
-
-          <div className="hero-buttons">
-
-            <button
-              className="primary-btn"
-              onClick={() => scrollTo("marketplace")}
-            >
-              Browse Marketplace →
-            </button>
-
-            <button
-              className="outline-btn"
-              onClick={() => setShowSell(true)}
-            >
-              + Sell an Item
-            </button>
-
-            <button
-              className="team-btn"
-              onClick={() => scrollTo("team-finder")}
-            >
-              🤝 Find Teammates
-            </button>
-
-          </div>
-
-          <div className="hero-stats">
-
-            <div>
-              <strong>500+</strong>
-              <span>Students</span>
-            </div>
-
-            <div>
-              <strong>{products.length + 116}+</strong>
-              <span>Listings</span>
-            </div>
-
-            <div>
-              <strong>80+</strong>
-              <span>Items Reused</span>
-            </div>
-
-          </div>
-
-        </div>
-
-        <div className="hero-visual">
-
-          <div className="floating-card card-one">
-            <span>📚</span>
-            <div>
-              <strong>Engineering Books</strong>
-              <small>Student Collection</small>
-            </div>
-          </div>
-
-          <div className="main-circle">
-            ♻
-          </div>
-
-          <div className="floating-card card-two">
-            <span>🧪</span>
-            <div>
-              <strong>Lab Equipment</strong>
-              <small>Student Verified</small>
-            </div>
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* FEATURES */}
-      <section className="features">
-
-        <div className="feature">
-          <div className="feature-icon">💰</div>
-          <h3>Save Money</h3>
-          <p>
-            Get academic materials at affordable prices.
-          </p>
-        </div>
-
-        <div className="feature">
-          <div className="feature-icon">♻️</div>
-          <h3>Reduce Waste</h3>
-          <p>
-            Give your unused materials a second life.
-          </p>
-        </div>
-
-        <div className="feature">
-          <div className="feature-icon">🎓</div>
-          <h3>Students Only</h3>
-          <p>
-            Connect safely with students from your campus.
-          </p>
-        </div>
-
-        <div className="feature">
-          <div className="feature-icon">📍</div>
-          <h3>Campus Pickup</h3>
-          <p>
-            Easy hand-to-hand exchange inside campus.
-          </p>
-        </div>
-
-      </section>
-
-      {/* MARKETPLACE */}
-      <section
-        className="marketplace section"
-        id="marketplace"
-      >
-
-        <div className="section-heading">
-          <span>MARKETPLACE</span>
-          <h2>Find What You Need</h2>
-          <p>
-            Books, notes, lab equipment and more.
-          </p>
-        </div>
-
-        <div className="search-box">
-
-          <input
-            type="text"
-            value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
-            placeholder="🔍 Search academic materials..."
-          />
-
-          <select
-            value={category}
-            onChange={(e) =>
-              setCategory(e.target.value)
-            }
-          >
-            <option>All Categories</option>
-            <option>Books</option>
-            <option>Notes</option>
-            <option>Lab Equipment</option>
-            <option>Graphics</option>
-          </select>
-
-          <button
-            onClick={() => scrollTo("product-grid")}
-          >
-            Search
-          </button>
-
-        </div>
-
-        <div className="marketplace-top">
-
-          <span>
-            {filteredProducts.length} items found
-          </span>
-
-          <button
-            className="small-sell-btn"
-            onClick={() => setShowSell(true)}
-          >
-            + List Your Item
-          </button>
-
-        </div>
-
-        <div
-          className="product-grid"
-          id="product-grid"
-        >
-
-          {filteredProducts.length ? (
-            filteredProducts.map((product) => (
-              <div
-                className="product-card"
-                key={product.id}
-              >
-
-                <button
-                  className={`heart-btn ${
-                    wishlist.includes(product.id)
-                      ? "active"
-                      : ""
-                  }`}
-                  onClick={() =>
-                    toggleWishlist(product.id)
-                  }
-                >
-                  {wishlist.includes(product.id)
-                    ? "❤️"
-                    : "♡"}
-                </button>
-
-                <div className="product-image">
-
-                  {product.image ? (
-                    <img
-                      src={product.image}
-                      alt={product.title}
-                    />
-                  ) : (
-                    <span>{product.icon}</span>
-                  )}
-
-                </div>
-
-                <div className="product-info">
-
-                  <span className="product-category">
-                    {product.category}
-                  </span>
-
-                  <h3>{product.title}</h3>
-
-                  <p>{product.description}</p>
-
-                  <div className="product-meta">
-                    <small>
-                      📍 {product.location}
-                    </small>
-
-                    <small>
-                      {product.condition}
-                    </small>
-                  </div>
-
-                  <div className="product-bottom">
-
-                    <strong>{product.price}</strong>
-
-                    <button
-                      onClick={() =>
-                        setSelectedProduct(product)
-                      }
-                    >
-                      View
-                    </button>
-
-                  </div>
-
-                </div>
-
+      {tab === "home" && (
+        <main>
+          <section className="hero">
+            <div className="hero-copy">
+              <span className="eyebrow">🎓 CAMPUS DIGITAL ECOSYSTEM</span>
+              <h1>One platform.<br/><span>Everything students need.</span></h1>
+              <p>Buy & sell academic materials, discover verified notes and resources, build high-performing teams, use AI tools and explore the commercial campus ecosystem.</p>
+              <div className="hero-buttons">
+                <button className="primary-btn" onClick={() => go("marketplace")}>Explore Marketplace →</button>
+                <button className="secondary-btn" onClick={() => go("notes")}>📚 Browse Verified Notes</button>
+                <button className="secondary-btn" onClick={() => go("team")}>🤝 Find Teammates</button>
               </div>
-            ))
-          ) : (
-            <div className="empty-state">
-              <div>🔎</div>
-              <h3>No items found</h3>
-              <p>
-                Try another search or category.
-              </p>
+              <div className="trust-row"><span>✓ Campus-focused</span><span>✓ Verified contributors</span><span>✓ Student-first</span></div>
+            </div>
+            <div className="hero-visual">
+              <div className="orbit-card one">📚 <b>Verified Notes</b><small>Faculty + 9.0+ CGPA</small></div>
+              <div className="hero-logo">♻<small>SMART<br/>CAMPUS</small></div>
+              <div className="orbit-card two">🤝 <b>Team Matching</b><small>Skills • Ratings • Availability</small></div>
+              <div className="orbit-card three">🛍️ <b>Marketplace</b><small>Reuse • Save • Earn</small></div>
+            </div>
+          </section>
+
+          <section className="feature-strip">
+            {[
+              ["📚", "Verified Knowledge", "Faculty and 9.0+ CGPA contributors"],
+              ["🛍️", "Campus Marketplace", "Buy, sell and reuse materials"],
+              ["🤝", "Team Finder", "Find coders, presenters & designers"],
+              ["🧩", "Resource Hub", "PYQs, manuals, sheets & career resources"],
+              ["🤖", "AI Center", "Smart recommendations & team matching"],
+              ["💼", "Commercialisation", "Plans, subscriptions & campus analytics"],
+            ].map(x => (
+              <div className="feature-card" key={x[1]} onClick={() => x[1] === "AI Center" ? go("ai") : x[1] === "Commercialisation" ? go("business") : null}>
+                <i>{x[0]}</i><div><b>{x[1]}</b><span>{x[2]}</span></div>
+              </div>
+            ))}
+          </section>
+
+          <section className="section">
+            <SectionTitle eyebrow="WHY UNITRADE" title="Built to become a real campus product" text="A scalable frontend foundation for a student marketplace + academic knowledge network." />
+            <div className="metric-grid">
+              <Metric n="500+" t="Students" />
+              <Metric n="120+" t="Resources" />
+              <Metric n="9.0+" t="Verified student-note threshold" />
+              <Metric n="24/7" t="Campus access" />
+            </div>
+          </section>
+        </main>
+      )}
+
+      {tab === "marketplace" && (
+        <main className="section page">
+          <SectionTitle eyebrow="CAMPUS MARKETPLACE" title="Buy, sell & reuse" text="A safer peer-to-peer marketplace for academic materials." />
+          <div className="toolbar">
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔎 Search books, kits, notes..." />
+            <button className="primary-btn" onClick={() => requireLogin(() => { setListing(prev => ({ ...prev, seller: user?.name || prev.seller })); setModal("listing"); })}>+ List Item</button>
+          </div>
+          <div className="chips">{["All", "Books", "Notes", "Lab Equipment", "Graphics"].map(c =>
+            <button className={marketCategory === c ? "selected" : ""} key={c} onClick={() => setMarketCategory(c)}>{c}</button>
+          )}</div>
+          <div className="product-grid">
+            {filteredProducts.map(p => (
+              <article className="product-card" key={p.id}>
+                <button className="heart" onClick={() => toggleWish(p.id)}>{wishlist.includes(p.id) ? "❤️" : "♡"}</button>
+                {p.image ? <img className="card-photo" src={p.image} alt={p.title} /> : <div className="product-icon">{p.icon}</div>}
+                <span className="tag">{p.category}</span>
+                <h3>{p.title}</h3>
+                <p>Good quality academic material available on campus.</p>
+                <div className="meta"><span>📍 {p.location}</span><span>👤 {p.seller}</span><span>✓ Verified</span></div>
+                <div className="card-bottom"><b>{p.price === 0 ? "FREE" : `₹${p.price}`}</b><button className="small-btn" onClick={() => setModal({ type: "product", data: p })}>View</button></div>
+              </article>
+            ))}
+          </div>
+        </main>
+      )}
+
+      {tab === "notes" && (
+        <main className="section page">
+          <div className="notes-hero">
+            <div><span className="eyebrow">🔐 TRUSTED ACADEMIC KNOWLEDGE</span><h1>Verified Notes Library</h1><p>Only <b>faculty members</b> and students with <b>9.0+ CGPA</b> can publish verified notes in this frontend demo.</p></div>
+            <button className="primary-btn" onClick={() => requireLogin(() => setModal("note"))}>+ Upload Notes</button>
+          </div>
+          <div className="verification-banner"><b>✓ Verification Standard</b><span>Faculty verification OR student CGPA ≥ 9.0</span><span>•</span><span>Quality moderation</span><span>•</span><span>Access → Rating</span></div>
+          <div className="toolbar"><input value={noteSearch} onChange={e => setNoteSearch(e.target.value)} placeholder="🔎 Search verified notes..." /><select value={noteSubject} onChange={e => setNoteSubject(e.target.value)}>{noteSubjects.map(x => <option key={x}>{x}</option>)}</select></div>
+          <div className="notes-grid">
+            {filteredNotes.map(n => {
+              const myKey = user ? `${user.email}:${n.id}` : "";
+              const hasRated = Boolean(noteRatings[myKey]);
+              return (
+                <article className="note-card" key={n.id}>
+                  {n.image ? <img className="card-photo note-photo" src={n.image} alt={n.title} /> : <div className="note-top"><span className="big-icon">{n.icon}</span><span className="verified">✓ VERIFIED</span></div>}
+                  <div className="note-top compact"><span className="tag">{n.subject} • {n.semester} Sem</span><span className="verified">✓ VERIFIED</span></div>
+                  <h3>{n.title}</h3>
+                  <p>By <b>{n.author}</b> · {n.authorType}</p>
+                  <div className="rating">{n.rating > 0 ? `⭐ ${n.rating}` : "☆ Not rated yet"} <span>• {n.downloads} accesses</span></div>
+                  <button className="wide-btn" onClick={() => accessNote(n)}>Open / Access Notes</button>
+                  {noteAccess.includes(n.id) && !hasRated && (
+                    <button className="rate-link" onClick={() => setModal({ type: "rateNote", data: n })}>⭐ Rate after access</button>
+                  )}
+                  {hasRated && <small className="rated-msg">✓ You rated this note</small>}
+                </article>
+              );
+            })}
+          </div>
+        </main>
+      )}
+
+      {tab === "resources" && (
+        <main className="section page">
+          <SectionTitle eyebrow="RESOURCE HUB" title="Resources beyond notes" text="Useful academic and career material for everyday student life." />
+          <div className="resource-categories">
+            {resourceCategories.map(x => <button key={x} className={resourceCategory === x ? "selected" : ""} onClick={() => setResourceCategory(x)}>{x}</button>)}
+          </div>
+          <div className="toolbar"><input value={resourceSearch} onChange={e => setResourceSearch(e.target.value)} placeholder="🔎 Search PYQs, manuals, cheat sheets..." /><button className="primary-btn" onClick={() => requireLogin(() => setModal("resource"))}>+ Add Resource</button></div>
+          <div className="resource-grid">
+            {filteredResources.map(r => (
+              <article className="resource-card" key={r.id}>
+                {r.image ? <img className="resource-photo" src={r.image} alt={r.title} /> : <div className="resource-icon">{r.icon}</div>}
+                <span className="tag">{r.category}</span><h3>{r.title}</h3><p>{r.subject} · {r.type}</p>
+                <div className="resource-foot"><span>✓ Verified · {r.downloads} uses</span><button className="small-btn" onClick={() => download(r.title)}>Open</button></div>
+              </article>
+            ))}
+          </div>
+        </main>
+      )}
+
+      {tab === "team" && (
+        <main className="section page">
+          <SectionTitle eyebrow="HACKATHON TEAM FINDER" title="Build the right team" text="Discover students by role, skills, availability and ratings." />
+          <div className="toolbar"><input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔎 Search by name or skill..." /><select value={role} onChange={e => setRole(e.target.value)}>{roles.map(x => <option key={x}>{x}</option>)}</select><button className="primary-btn" onClick={() => requireLogin(() => setModal("member"))}>+ Add My Profile</button></div>
+          <div className="team-grid">
+            {filteredMembers.map(m => (
+              <article className="member-card" key={m.id}>
+                {m.image ? <img className="member-photo" src={m.image} alt={m.name} /> : <div className="avatar">{m.name.split(" ").map(x => x[0]).join("").slice(0, 2)}</div>}
+                <div className="member-head"><div><h3>{m.name} <span className="verified-dot">✓</span></h3><b>{m.role}</b></div><span className={m.status === "Available" ? "available" : "busy"}>{m.status}</span></div>
+                <p>{m.about}</p><div className="skill-list">{m.skills.map(s => <span key={s}>{s}</span>)}</div>
+                <div className="member-foot"><span>{m.rating ? `⭐ ${m.rating}` : "☆ New"} · {m.experience}</span><button className="small-btn" onClick={() => setModal({ type: "memberView", data: m })}>Invite</button></div>
+              </article>
+            ))}
+          </div>
+        </main>
+      )}
+
+      {tab === "ai" && (
+        <main className="section page">
+          <SectionTitle eyebrow="UNITRADE AI CENTER" title="AI-powered student assistance" text="A dedicated AI layer for team discovery, study planning and career/resource recommendations." />
+          <div className="ai-grid">
+            <AiCard icon="🤝" title="Smart Team Matcher" text="Match students by project role, skills, availability and ratings." button="Find Best Team" onClick={() => go("team")} />
+            <AiCard icon="📚" title="Study Assistant" text="Turn a subject or topic into a structured study plan, revision checklist and practice roadmap." button="Create Study Plan" onClick={() => notify("AI study planner demo is ready for backend AI integration 🤖")} />
+            <AiCard icon="🧩" title="Resource Recommendation" text="Recommend PYQs, notes, manuals and cheat sheets according to a student's selected subject." button="Explore Resources" onClick={() => go("resources")} />
+            <AiCard icon="💼" title="Career Recommendations" text="Suggest skills, project directions and campus opportunities based on a student's profile." button="Open Dashboard" onClick={() => go("dashboard")} />
+          </div>
+          <div className="ai-note"><b>Production plan:</b> connect this frontend to an AI API/backend for real recommendations, document Q&A and personalised matching.</div>
+        </main>
+      )}
+
+      {tab === "business" && (
+        <main className="section page">
+          <SectionTitle eyebrow="COMMERCIALISATION & BUSINESS" title="Turn UniTrade into a sustainable campus product" text="A commercial model that keeps core student welfare features accessible while creating revenue for operations and growth." />
+          <div className="business-grid">
+            <BusinessCard icon="🚀" title="Premium Listing Boost" text="Optional paid visibility for student sellers so useful listings reach more campus users." value="Revenue stream" />
+            <BusinessCard icon="🏫" title="College Subscription" text="Institutions can subscribe for verified portals, analytics, moderation and resource management." value="B2B recurring" />
+            <BusinessCard icon="⭐" title="Student Pro" text="Optional advanced AI tools, enhanced profile visibility and productivity features." value="B2C recurring" />
+            <BusinessCard icon="🤝" title="Partnerships" text="Future partnerships with education providers, recruiters and campus service providers." value="Partner revenue" />
+          </div>
+          <div className="business-panel">
+            <h3>Business KPIs</h3>
+            <div className="metric-grid">
+              <Metric n={products.length} t="Marketplace listings" />
+              <Metric n={notes.length} t="Verified notes" />
+              <Metric n={resources.length} t="Resources" />
+              <Metric n={members.length} t="Team profiles" />
+            </div>
+          </div>
+          <div className="pricing-grid">
+            <div className="price-card"><span className="tag">FREE</span><h3>Student Basic</h3><b>₹0</b><p>Marketplace, notes, resources and Team Finder.</p><button className="secondary-btn" onClick={() => notify("Basic plan selected")}>Current plan</button></div>
+            <div className="price-card featured-price"><span className="tag">PRO</span><h3>Student Pro</h3><b>₹49/mo</b><p>Advanced AI assistance, profile boost and productivity tools.</p><button className="primary-btn" onClick={() => notify("Student Pro demo selected")}>Explore Pro</button></div>
+            <div className="price-card"><span className="tag">COLLEGE</span><h3>Campus Partner</h3><b>Custom</b><p>Institutional verification, analytics, moderation and branded campus ecosystem.</p><button className="secondary-btn" onClick={() => notify("Campus Partner enquiry created")}>Contact Sales</button></div>
+          </div>
+        </main>
+      )}
+
+      {tab === "dashboard" && (
+        <main className="section page">
+          <SectionTitle eyebrow="STUDENT DASHBOARD" title={user ? `Welcome, ${user.name}` : "Your UniTrade workspace"} text="Manage your activity, saved items and campus identity." />
+          {!user ? <div className="empty-panel"><h2>Login to unlock your dashboard</h2><p>Save listings, publish resources and create your team profile.</p><button className="primary-btn" onClick={() => setModal("login")}>Login / Sign Up</button></div> :
+            <div className="dashboard-grid">
+              <div className="dash-profile"><div className="avatar large">{user.name.split(" ").map(x => x[0]).join("").slice(0, 2)}</div><h2>{user.name}</h2><p>{user.email}</p><span className="verified">✓ Campus Account</span><button className="secondary-btn" onClick={() => setModal("member")}>Create / Edit Team Profile</button><button className="secondary-btn" onClick={() => go("ai")}>🤖 AI Center</button><button className="secondary-btn" onClick={() => go("business")}>💼 Commercialisation</button></div>
+              <div className="dash-stats"><Metric n={wishlist.length} t="Saved items"/><Metric n={products.length} t="Marketplace listings"/><Metric n={notes.length} t="Verified notes"/><Metric n={resources.length} t="Resources"/></div>
+            </div>}
+        </main>
+      )}
+
+      <footer>
+        <div><b className="footer-logo">♻ UniTrade</b><p>Student Welfare & Resource Sharing Platform</p></div>
+        <div><b>Product</b><span onClick={() => go("marketplace")}>Marketplace</span><span onClick={() => go("notes")}>Verified Notes</span><span onClick={() => go("team")}>Team Finder</span></div>
+        <div><b>Innovation</b><span onClick={() => go("ai")}>AI Center</span><span onClick={() => go("business")}>Commercialisation</span><span>Campus-first design</span></div>
+        <div><b>Vision</b><span>Multi-campus ecosystem</span><span>Academic resource sharing</span></div>
+      </footer>
+
+      {modal && (
+        <Modal title={
+          modal === "login" ? "Welcome to UniTrade" :
+          modal === "listing" ? "List an Academic Item" :
+          modal === "note" ? "Upload Verified Notes" :
+          modal === "resource" ? "Add a Resource" :
+          modal === "member" ? "Create Team Profile" :
+          modal === "wishlist" ? "Your Wishlist" :
+          modal?.type === "product" ? modal.data.title :
+          modal?.type === "memberView" ? modal.data.name :
+          modal?.type === "noteAccess" ? "Notes Access" :
+          modal?.type === "rateNote" ? "Rate this Note" : "UniTrade"
+        } onClose={() => setModal(null)}>
+
+          {modal === "login" && (
+            <form className="form" onSubmit={submitLogin}>
+              <div className="auth-switch">
+                <button type="button" className={authMode === "login" ? "active" : ""} onClick={() => setAuthMode("login")}>Login</button>
+                <button type="button" className={authMode === "register" ? "active" : ""} onClick={() => setAuthMode("register")}>Create Account</button>
+              </div>
+
+              {authMode === "register" && (
+                <>
+                  <label>Full Name<input name="name" placeholder="Your full name" required /></label>
+                  <div className="two">
+                    <label>College / Institution<input name="college" placeholder="Your college" required /></label>
+                    <label>Course<input name="course" placeholder="B.Tech IT" /></label>
+                  </div>
+                </>
+              )}
+
+              <label>College Email<input name="email" type="email" placeholder="student@college.edu" required /></label>
+              <label>Password<input name="password" type="password" placeholder="Minimum 6 characters" minLength="6" required /></label>
+              <div className="info-box">
+                <b>{authMode === "register" ? "Create your real UniTrade account." : "Login with your UniTrade account."}</b>
+                <br />Your account is securely handled by the UniTrade backend using JWT authentication.
+              </div>
+              <button className="primary-btn" disabled={authLoading}>
+                {authLoading ? "Please wait..." : authMode === "register" ? "Create Account →" : "Login →"}
+              </button>
+            </form>
+          )}
+
+          {modal === "listing" && (
+            <form className="form" onSubmit={addListing}>
+              <label>Item Name<input value={listing.title} onChange={e => setListing({...listing, title:e.target.value})} placeholder="e.g. Data Structures Book" required /></label>
+              <div className="two">
+                <label>Category<select value={listing.category} onChange={e => setListing({...listing, category:e.target.value})}><option>Books</option><option>Notes</option><option>Lab Equipment</option><option>Graphics</option></select></label>
+                <label>Price<input type="number" min="0" value={listing.price} onChange={e => setListing({...listing, price:e.target.value})} placeholder="₹" required /></label>
+              </div>
+              <label>Pickup Location<input value={listing.location} onChange={e => setListing({...listing, location:e.target.value})} placeholder="Campus / Hostel" required /></label>
+              <label>Condition<select value={listing.condition} onChange={e => setListing({...listing, condition:e.target.value})}><option>Like New</option><option>Excellent</option><option>Good</option></select></label>
+              <label>Seller Name<input value={listing.seller} onChange={e => setListing({...listing, seller:e.target.value})} placeholder="Your name" required /></label>
+              <label>Item Photo *<input type="file" accept="image/*" onChange={e => readImage(e.target.files?.[0], setListing)} required /></label>
+              {listing.image && <img className="upload-preview" src={listing.image} alt="Item preview" />}
+              <button className="primary-btn">Publish Listing</button>
+            </form>
+          )}
+
+          {modal === "note" && (
+            <form className="form" onSubmit={addNote}>
+              <div className="info-box"><b>Verification rule:</b> Faculty members or students with CGPA ≥ 9.0 only. In production, faculty identity/CGPA must be checked by backend/admin.</div>
+              <label>Note Title<input value={noteForm.title} onChange={e => setNoteForm({...noteForm,title:e.target.value})} placeholder="e.g. DBMS Unit 1–5 Notes" required /></label>
+              <div className="two">
+                <label>Subject<select value={noteForm.subject} onChange={e => setNoteForm({...noteForm,subject:e.target.value})}>{noteSubjects.slice(1).map(x => <option key={x}>{x}</option>)}</select></label>
+                <label>Semester<input value={noteForm.semester} onChange={e => setNoteForm({...noteForm,semester:e.target.value})} required /></label>
+              </div>
+              <label>Contributor Type<select value={noteForm.authorType} onChange={e => setNoteForm({...noteForm,authorType:e.target.value})}><option>Student</option><option>Faculty</option></select></label>
+              {noteForm.authorType === "Student" && <label>CGPA<input type="number" min="0" max="10" step="0.01" value={noteForm.cgpa} onChange={e => setNoteForm({...noteForm,cgpa:e.target.value})} placeholder="Minimum 9.0" required /></label>}
+              <label>College / Institution<input value={noteForm.college} onChange={e => setNoteForm({...noteForm,college:e.target.value})} required /></label>
+              <label>Description<textarea value={noteForm.description} onChange={e => setNoteForm({...noteForm,description:e.target.value})} placeholder="What does this resource cover?" required /></label>
+              <label>Notes File *<input type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={e => readNoteFile(e.target.files?.[0])} required /></label>
+              {noteForm.file && <div className="file-selected">📄 {noteForm.file.name}</div>}
+              <label>Notes Cover Photo *<input type="file" accept="image/*" onChange={e => readImage(e.target.files?.[0], setNoteForm)} required /></label>
+              {noteForm.image && <img className="upload-preview" src={noteForm.image} alt="Notes preview" />}
+              <button className="primary-btn">Submit for Verification ✓</button>
+            </form>
+          )}
+
+          {modal === "resource" && (
+            <form className="form" onSubmit={addResource}>
+              <label>Resource Title<input value={resourceForm.title} onChange={e => setResourceForm({...resourceForm,title:e.target.value})} required /></label>
+              <div className="two">
+                <label>Category<select value={resourceForm.category} onChange={e => setResourceForm({...resourceForm,category:e.target.value})}>{resourceCategories.slice(1).map(x => <option key={x}>{x}</option>)}</select></label>
+                <label>Subject<input value={resourceForm.subject} onChange={e => setResourceForm({...resourceForm,subject:e.target.value})} required /></label>
+              </div>
+              <label>Type<select value={resourceForm.type} onChange={e => setResourceForm({...resourceForm,type:e.target.value})}><option>PDF</option><option>DOC</option><option>Link</option></select></label>
+              <label>Description<textarea value={resourceForm.description} onChange={e => setResourceForm({...resourceForm,description:e.target.value})} required /></label>
+              <label>Resource Photo *<input type="file" accept="image/*" onChange={e => readImage(e.target.files?.[0], setResourceForm)} required /></label>
+              {resourceForm.image && <img className="upload-preview" src={resourceForm.image} alt="Resource preview" />}
+              <button className="primary-btn">Add Resource</button>
+            </form>
+          )}
+
+          {modal === "member" && (
+            <form className="form" onSubmit={addMember}>
+              <label>Name<input value={profile.name} onChange={e => setProfile({...profile,name:e.target.value})} placeholder="Your name" required /></label>
+              <label>Role<select value={profile.role} onChange={e => setProfile({...profile,role:e.target.value})}>{roles.slice(1).map(x => <option key={x}>{x}</option>)}</select></label>
+              <label>Skills <small>comma separated</small><input value={profile.skills} onChange={e => setProfile({...profile,skills:e.target.value})} placeholder="React, JavaScript, CSS" required /></label>
+              <label>College<input value={profile.college} onChange={e => setProfile({...profile,college:e.target.value})} required /></label>
+              <div className="two"><label>Email<input type="email" value={profile.email} onChange={e => setProfile({...profile,email:e.target.value})} placeholder="your@email.com" /></label><label>Phone<input value={profile.phone} onChange={e => setProfile({...profile,phone:e.target.value})} placeholder="Contact number" /></label></div>
+              <label>About<textarea value={profile.about} onChange={e => setProfile({...profile,about:e.target.value})} /></label>
+              <label>Profile Photo *<input type="file" accept="image/*" onChange={e => readImage(e.target.files?.[0], setProfile)} required /></label>
+              {profile.image && <img className="upload-preview avatar-preview" src={profile.image} alt="Profile preview" />}
+              <div className="info-box">Profile photo is compulsory for a new Team Finder profile.</div>
+              <button className="primary-btn">Publish Team Profile</button>
+            </form>
+          )}
+
+          {modal === "wishlist" && (
+            <div className="wishlist-list">
+              {wishlist.length === 0 ? <div className="empty-panel">No saved items yet.</div> :
+                products.filter(p => wishlist.includes(p.id)).map(p => (
+                  <div className="wish-row" key={p.id}><span>{p.icon}</span><div><b>{p.title}</b><small>{p.category}</small></div><strong>{p.price === 0 ? "FREE" : `₹${p.price}`}</strong></div>
+                ))}
             </div>
           )}
 
-        </div>
-
-      </section>
-
-      {/* TEAM FINDER */}
-      <section
-        className="team-finder section"
-        id="team-finder"
-      >
-
-        <div className="section-heading">
-          <span>HACKATHON TEAM FINDER</span>
-
-          <h2>Find the Right Teammate</h2>
-
-          <p>
-            Need a coder, presenter, developer,
-            analyst or designer? Find students with
-            the skills you need.
-          </p>
-        </div>
-
-        <div className="team-tools">
-
-          <input
-            value={teamSearch}
-            onChange={(e) =>
-              setTeamSearch(e.target.value)
-            }
-            placeholder="🔍 Search by name or skill..."
-          />
-
-          <select
-            value={teamRole}
-            onChange={(e) =>
-              setTeamRole(e.target.value)
-            }
-          >
-            <option>All Roles</option>
-            <option>Coder</option>
-            <option>Presenter</option>
-            <option>Frontend Developer</option>
-            <option>Backend Developer</option>
-            <option>Data Analyst</option>
-            <option>UI/UX Designer</option>
-            <option>Documentation</option>
-          </select>
-
-          <button
-            onClick={() => setShowTeamFinder(true)}
-          >
-            Open Team Finder
-          </button>
-
-        </div>
-
-        <div className="team-profile-add">
-
-          <button
-            className="primary-btn"
-            onClick={() => openMemberForm()}
-          >
-            ＋ Add Another Team Member
-          </button>
-
-        </div>
-
-        <div className="role-pills">
-
-          {roleButtons.map(([icon, role]) => (
-            <button
-              key={role}
-              onClick={() => setTeamRole(role)}
-              className={
-                teamRole === role
-                  ? "role-active"
-                  : ""
-              }
-            >
-              {icon} {role}
-            </button>
-          ))}
-
-        </div>
-
-        <div className="team-grid">
-
-          {filteredTeammates.map((person) => (
-
-            <div
-              className="team-card"
-              key={person.id}
-            >
-
-              {person.image ? (
-                <img
-                  className="team-photo"
-                  src={person.image}
-                  alt={person.name}
-                />
-              ) : (
-                <div className="team-avatar">
-                  {person.name.charAt(0)}
-                </div>
-              )}
-
-              <div className="team-card-head">
-
-                <div>
-                  <h3>{person.name}</h3>
-                  <span>{person.role}</span>
-                </div>
-
-                <b
-                  className={
-                    person.status === "Available"
-                      ? "available"
-                      : "busy"
-                  }
-                >
-                  ● {person.status}
-                </b>
-
-              </div>
-
-              <div className="team-skills">
-
-                {person.skills.map((skill) => (
-                  <span key={skill}>
-                    {skill}
-                  </span>
-                ))}
-
-              </div>
-
-              <div className="team-meta">
-
-                <span>
-                  {person.rating == null
-                    ? "New"
-                    : `⭐ ${person.rating}`}
-                </span>
-
-                <span>
-                  🏆 {person.experience}
-                </span>
-
-              </div>
-
-              <p>{person.about}</p>
-
-              <div className="contact-mini">
-                📧 {person.email}
-              </div>
-
-              <div className="team-actions">
-
-                <button
-                  onClick={() =>
-                    setSelectedTeammate(person)
-                  }
-                >
-                  View Profile
-                </button>
-
-                <button
-                  className="invite-btn"
-                  onClick={() =>
-                    inviteMember(person)
-                  }
-                >
-                  {invitedMembers.includes(person.id)
-                    ? "✓ Invited"
-                    : "🤝 Invite"}
-                </button>
-
-              </div>
-
-              <div className="owner-actions">
-                <button
-                  className="edit-profile-btn"
-                  onClick={() => openMemberForm(person)}
-                >
-                  ✎ Edit
-                </button>
-                <button
-                  className="delete-profile-btn"
-                  onClick={() => deleteMember(person)}
-                >
-                  🗑 Delete
-                </button>
-              </div>
-
-              {invitedMembers.includes(person.id) && (
-                <button
-                  className="review-btn"
-                  onClick={() =>
-                    openReview(person)
-                  }
-                >
-                  ⭐ Give Review
-                </button>
-              )}
-
+          {modal?.type === "product" && (
+            <div className="detail">
+              {modal.data.image ? <img className="detail-photo" src={modal.data.image} alt={modal.data.title} /> : <div className="detail-icon">{modal.data.icon}</div>}
+              <span className="verified">✓ VERIFIED LISTING</span><h2>{modal.data.title}</h2>
+              <p>Academic material available for campus pickup. Connect through the platform to coordinate safely.</p>
+              <div className="detail-grid"><b>₹{modal.data.price}</b><span>Condition: {modal.data.condition}</span><span>Seller: {modal.data.seller}</span><span>📍 {modal.data.location}</span></div>
+              <button className="primary-btn" onClick={() => notify("Connection request sent 🤝")}>Connect with Seller</button>
             </div>
+          )}
 
-          ))}
-
-        </div>
-
-      </section>
-
-      {/* RESOURCES */}
-      <section
-        className="resources section"
-        id="resources"
-      >
-
-        <div className="resources-text">
-
-          <span>FREE RESOURCES</span>
-
-          <h2>
-            Learn More.
-            <br />
-            Spend Less.
-          </h2>
-
-          <p>
-            Access student-contributed notes,
-            previous year question papers and
-            academic resources for free.
-          </p>
-
-          <button
-            className="primary-btn"
-            onClick={() =>
-              notify(
-                "Resources section is ready for backend files!"
-              )
-            }
-          >
-            Explore Resources →
-          </button>
-
-        </div>
-
-        <div className="resource-card">
-
-          {resources.map((resource) => (
-
-            <div
-              className="resource-item"
-              key={resource.title}
-            >
-
-              <span className="resource-icon">
-                {resource.icon}
-              </span>
-
-              <div>
-                <h3>{resource.title}</h3>
-                <p>{resource.count}</p>
-              </div>
-
-              <button
-                onClick={() =>
-                  notify(`${resource.title} opened`)
-                }
-              >
-                View →
-              </button>
-
+          {modal?.type === "memberView" && (
+            <div className="detail">
+              {modal.data.image ? <img className="detail-photo profile-detail-photo" src={modal.data.image} alt={modal.data.name} /> : <div className="avatar large">{modal.data.name.split(" ").map(x => x[0]).join("").slice(0, 2)}</div>}
+              <span className="verified">✓ VERIFIED PROFILE</span><h2>{modal.data.name}</h2><b>{modal.data.role}</b><p>{modal.data.about}</p>
+              <div className="skill-list">{modal.data.skills.map(s => <span key={s}>{s}</span>)}</div>
+              <div className="detail-grid"><span>⭐ {modal.data.rating || "New"}</span><span>{modal.data.experience}</span><span>{modal.data.status}</span></div>
+              <button className="primary-btn" onClick={() => notify(`Invite sent to ${modal.data.name}!`)}>Send Team Invite</button>
             </div>
+          )}
 
-          ))}
-
-        </div>
-
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section
-        className="how section"
-        id="how"
-      >
-
-        <div className="section-heading">
-
-          <span>HOW IT WORKS</span>
-
-          <h2>
-            Simple. Safe. Sustainable.
-          </h2>
-
-        </div>
-
-        <div className="steps">
-
-          {[
-            [
-              "01",
-              "List Your Item",
-              "Upload your unused books, notes or academic equipment.",
-            ],
-            [
-              "02",
-              "Student Finds It",
-              "Another student searches and discovers your listing.",
-            ],
-            [
-              "03",
-              "Connect",
-              "Contact the seller and decide a campus pickup point.",
-            ],
-            [
-              "04",
-              "Reuse",
-              "The material gets reused instead of becoming waste.",
-            ],
-          ].map(([number, title, text]) => (
-
-            <div
-              className="step"
-              key={number}
-            >
-
-              <div className="step-number">
-                {number}
-              </div>
-
-              <h3>{title}</h3>
-
-              <p>{text}</p>
-
+          {modal?.type === "noteAccess" && (
+            <div className="detail">
+              <div className="detail-icon">📚</div><span className="verified">✓ ACCESS GRANTED</span><h2>{modal.data.title}</h2>
+              <p>This demo records that you accessed this note. Only after access can you submit a rating.</p>
+              <div className="file-selected">📄 {modal.data.fileName || "Demo note file"}</div>
+              <button className="primary-btn" onClick={() => setModal({ type: "rateNote", data: modal.data })}>⭐ Rate this note</button>
             </div>
+          )}
 
-          ))}
-
-        </div>
-
-      </section>
-
-      {/* ABOUT / IMPACT */}
-      <section
-        className="about section"
-        id="about"
-      >
-
-        <div className="section-heading">
-
-          <span>OUR IMPACT</span>
-
-          <h2>
-            One Campus. Less Waste.
-          </h2>
-
-        </div>
-
-        <div className="impact-grid">
-
-          <div>
-            <strong>12K+</strong>
-            <p>Estimated Student Savings</p>
-          </div>
-
-          <div>
-            <strong>150+</strong>
-            <p>Materials Reused</p>
-          </div>
-
-          <div>
-            <strong>80kg</strong>
-            <p>Estimated Waste Avoided</p>
-          </div>
-
-          <div>
-            <strong>300+</strong>
-            <p>Students Connected</p>
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* FOOTER */}
-      <footer>
-
-        <div className="logo">
-          <span className="logo-mark">♻</span>
-          UniTrade
-        </div>
-
-        <p>
-          Campus Peer-to-Peer Academic Marketplace
-        </p>
-
-        <small>
-          Built for Hackathon • Smart Education &
-          Sustainable Campus
-        </small>
-
-      </footer>
-
-      {/* PRODUCT MODAL */}
-      {selectedProduct && (
-
-        <div
-          className="modal-overlay"
-          onClick={() => setSelectedProduct(null)}
-        >
-
-          <div
-            className="modal-card"
-            onClick={(e) => e.stopPropagation()}
-          >
-
-            <button
-              className="modal-close"
-              onClick={() =>
-                setSelectedProduct(null)
-              }
-            >
-              ✕
-            </button>
-
-            <div className="modal-icon">
-              {selectedProduct.image ? (
-                <img
-                  src={selectedProduct.image}
-                  alt={selectedProduct.title}
-                />
-              ) : (
-                selectedProduct.icon
-              )}
-            </div>
-
-            <span className="form-label">
-              {selectedProduct.category}
-            </span>
-
-            <h2>{selectedProduct.title}</h2>
-
-            <p className="modal-description">
-              {selectedProduct.description}
-            </p>
-
-            <div className="modal-details seller-info-panel">
-
-              <div>
-                <span>Price</span>
-                <strong>
-                  {selectedProduct.price}
-                </strong>
-              </div>
-
-              <div>
-                <span>Seller</span>
-                <strong>
-                  {selectedProduct.seller}
-                </strong>
-              </div>
-
-              <div>
-                <span>Condition</span>
-                <strong>
-                  {selectedProduct.condition}
-                </strong>
-              </div>
-
-              <div>
-                <span>Pickup</span>
-                <strong>
-                  {selectedProduct.location}
-                </strong>
-              </div>
-
-              <div>
-                <span>Contact</span>
-                <strong>
-                  {selectedProduct.phone}
-                </strong>
-              </div>
-
-              <div>
-                <span>Email</span>
-                <strong>
-                  {selectedProduct.email}
-                </strong>
-              </div>
-
-            </div>
-
-            <button
-              className="connect-btn"
-              onClick={() => {
-                setSelectedProduct(null);
-                notify(
-                  "Seller connection request sent! 🤝"
-                );
-              }}
-            >
-              Connect with Seller →
-            </button>
-
-          </div>
-
-        </div>
+          {modal?.type === "rateNote" && (
+            <RatingForm note={modal.data} onSubmit={rating => submitNoteRating(modal.data, rating)} onClose={() => setModal(null)} />
+          )}
+        </Modal>
       )}
 
-      {/* SELL MODAL */}
-      {showSell && (
-
-        <div
-          className="modal-overlay"
-          onClick={() => setShowSell(false)}
-        >
-
-          <div
-            className="form-card"
-            onClick={(e) => e.stopPropagation()}
-          >
-
-            <button
-              className="modal-close"
-              onClick={() => setShowSell(false)}
-            >
-              ✕
-            </button>
-
-            <span className="form-label">
-              SELL AN ITEM
-            </span>
-
-            <h2>
-              List Your Academic Material
-            </h2>
-
-            <p className="form-subtitle">
-              Help another student reuse what you
-              no longer need.
-            </p>
-
-            <form onSubmit={handleSell}>
-
-              <div className="form-grid">
-
-                <label>
-                  Item Name *
-                  <input
-                    value={form.title}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        title: e.target.value,
-                      })
-                    }
-                    placeholder="e.g. Data Structures Book"
-                  />
-                </label>
-
-                <label>
-                  Category
-                  <select
-                    value={form.category}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        category: e.target.value,
-                      })
-                    }
-                  >
-                    <option>Books</option>
-                    <option>Notes</option>
-                    <option>Lab Equipment</option>
-                    <option>Graphics</option>
-                  </select>
-                </label>
-
-                <label>
-                  Condition
-                  <select
-                    value={form.condition}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        condition: e.target.value,
-                      })
-                    }
-                  >
-                    <option>Like New</option>
-                    <option>Excellent</option>
-                    <option>Good</option>
-                    <option>Used</option>
-                  </select>
-                </label>
-
-                <label>
-                  Price
-                  <input
-                    type="number"
-                    min="0"
-                    value={form.price}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        price: e.target.value,
-                      })
-                    }
-                    placeholder="Leave empty for Free"
-                  />
-                </label>
-
-                <label>
-                  Seller Name *
-                  <input
-                    value={form.seller}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        seller: e.target.value,
-                      })
-                    }
-                    placeholder="Your name"
-                  />
-                </label>
-
-                <label>
-                  Contact Number *
-                  <input
-                    type="tel"
-                    value={form.phone}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        phone: e.target.value
-                          .replace(/\D/g, "")
-                          .slice(0, 10),
-                      })
-                    }
-                    placeholder="10-digit mobile number"
-                  />
-                </label>
-
-                <label>
-                  College Email *
-                  <input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        email: e.target.value,
-                      })
-                    }
-                    placeholder="student@college.edu"
-                  />
-                </label>
-
-                <label>
-                  Item Photo *
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                  />
-                </label>
-
-                <label>
-                  Campus Pickup *
-                  <input
-                    value={form.location}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        location: e.target.value,
-                      })
-                    }
-                    placeholder="e.g. Block A"
-                  />
-                </label>
-
-              </div>
-
-              {form.image && (
-                <div className="upload-preview-wrap">
-                  <span>Photo Preview</span>
-
-                  <img
-                    className="upload-preview"
-                    src={form.image}
-                    alt="Item preview"
-                  />
-                </div>
-              )}
-
-              <label>
-                Description *
-                <textarea
-                  rows="4"
-                  value={form.description}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      description: e.target.value,
-                    })
-                  }
-                  placeholder="Describe your item..."
-                />
-              </label>
-
-              <button
-                className="primary-btn form-submit"
-                type="submit"
-              >
-                Publish Listing →
-              </button>
-
-            </form>
-
-          </div>
-
-        </div>
-      )}
-
-      {/* LOGIN */}
-      {showLogin && (
-
-        <div
-          className="modal-overlay"
-          onClick={() => setShowLogin(false)}
-        >
-
-          <div
-            className="form-card auth-card"
-            onClick={(e) => e.stopPropagation()}
-          >
-
-            <button
-              className="modal-close"
-              onClick={() => setShowLogin(false)}
-            >
-              ✕
-            </button>
-
-            {!otpStep &&
-              authMode === "choice" && (
-                <>
-                  <div className="login-icon">
-                    🎓
-                  </div>
-
-                  <span className="form-label">
-                    CREATE ACCOUNT
-                  </span>
-
-                  <h2>Join UniTrade</h2>
-
-                  <p className="form-subtitle">
-                    Create an account using Google
-                    or verify your phone with OTP.
-                  </p>
-
-                  <button
-                    className="google-btn"
-                    onClick={googleDemoLogin}
-                  >
-                    G&nbsp; Continue with Google
-                  </button>
-
-                  <button
-                    className="outline-full"
-                    onClick={() =>
-                      setAuthMode("email")
-                    }
-                  >
-                    📱 Create Account with OTP
-                  </button>
-
-                  <div className="auth-divider">
-                    OR
-                  </div>
-
-                  <button
-                    className="text-btn"
-                    onClick={() =>
-                      setAuthMode("old-login")
-                    }
-                  >
-                    Already have an account? Login
-                  </button>
-                </>
-              )}
-
-            {!otpStep &&
-              authMode === "email" && (
-                <>
-                  <span className="form-label">
-                    SIGN UP WITH OTP
-                  </span>
-
-                  <h2>Create Account</h2>
-
-                  <form onSubmit={sendOtp}>
-
-                    <label>
-                      Name
-                      <input
-                        value={authForm.name}
-                        onChange={(e) =>
-                          setAuthForm({
-                            ...authForm,
-                            name: e.target.value,
-                          })
-                        }
-                        placeholder="Your full name"
-                      />
-                    </label>
-
-                    <label>
-                      Email
-                      <input
-                        type="email"
-                        value={authForm.email}
-                        onChange={(e) =>
-                          setAuthForm({
-                            ...authForm,
-                            email: e.target.value,
-                          })
-                        }
-                        placeholder="student@college.edu"
-                      />
-                    </label>
-
-                    <label>
-                      Mobile Number
-                      <input
-                        value={authForm.phone}
-                        onChange={(e) =>
-                          setAuthForm({
-                            ...authForm,
-                            phone: e.target.value
-                              .replace(/\D/g, "")
-                              .slice(0, 10),
-                          })
-                        }
-                        placeholder="10-digit mobile number"
-                      />
-                    </label>
-
-                    <button
-                      className="primary-btn form-submit"
-                      type="submit"
-                    >
-                      Send OTP →
-                    </button>
-
-                  </form>
-
-                  <button
-                    className="text-btn"
-                    onClick={() =>
-                      setAuthMode("choice")
-                    }
-                  >
-                    ← Back
-                  </button>
-                </>
-              )}
-
-            {!otpStep &&
-              authMode === "old-login" && (
-                <>
-                  <span className="form-label">
-                    LOGIN
-                  </span>
-
-                  <h2>Welcome Back</h2>
-
-                  <form onSubmit={handleLogin}>
-
-                    <label>
-                      Student Name
-                      <input
-                        name="name"
-                        placeholder="Enter your name"
-                      />
-                    </label>
-
-                    <label>
-                      College Email
-                      <input
-                        name="email"
-                        type="email"
-                        placeholder="student@college.edu"
-                      />
-                    </label>
-
-                    <button
-                      className="primary-btn form-submit"
-                      type="submit"
-                    >
-                      Login & Continue →
-                    </button>
-
-                  </form>
-
-                  <button
-                    className="text-btn"
-                    onClick={() =>
-                      setAuthMode("choice")
-                    }
-                  >
-                    ← Other login options
-                  </button>
-                </>
-              )}
-
-            {otpStep && (
-              <>
-                <div className="login-icon">
-                  🔐
-                </div>
-
-                <span className="form-label">
-                  VERIFY OTP
-                </span>
-
-                <h2>Enter OTP</h2>
-
-                <p className="form-subtitle">
-                  Demo OTP:
-                  <strong> 123456</strong>
-                </p>
-
-                <form onSubmit={verifyOtp}>
-
-                  <input
-                    className="otp-input"
-                    maxLength="6"
-                    value={otp}
-                    onChange={(e) =>
-                      setOtp(
-                        e.target.value
-                          .replace(/\D/g, "")
-                          .slice(0, 6)
-                      )
-                    }
-                    placeholder="Enter 6-digit OTP"
-                  />
-
-                  <button
-                    className="primary-btn form-submit"
-                    type="submit"
-                  >
-                    Verify & Sign In →
-                  </button>
-
-                </form>
-
-                <button
-                  className="text-btn"
-                  onClick={() =>
-                    setOtpStep(false)
-                  }
-                >
-                  ← Change details
-                </button>
-              </>
-            )}
-
-          </div>
-
-        </div>
-      )}
-
-      {/* WISHLIST */}
-      {showWishlist && (
-
-        <div
-          className="modal-overlay"
-          onClick={() => setShowWishlist(false)}
-        >
-
-          <div
-            className="form-card wishlist-card"
-            onClick={(e) => e.stopPropagation()}
-          >
-
-            <button
-              className="modal-close"
-              onClick={() =>
-                setShowWishlist(false)
-              }
-            >
-              ✕
-            </button>
-
-            <span className="form-label">
-              MY WISHLIST
-            </span>
-
-            <h2>Saved Items ❤️</h2>
-
-            {products.filter((p) =>
-              wishlist.includes(p.id)
-            ).length ? (
-
-              <div className="wishlist-list">
-
-                {products
-                  .filter((p) =>
-                    wishlist.includes(p.id)
-                  )
-                  .map((p) => (
-
-                    <div
-                      className="wishlist-item"
-                      key={p.id}
-                    >
-
-                      <span>{p.icon}</span>
-
-                      <div>
-                        <strong>{p.title}</strong>
-                        <small>{p.price}</small>
-                      </div>
-
-                      <button
-                        onClick={() =>
-                          setSelectedProduct(p)
-                        }
-                      >
-                        View
-                      </button>
-
-                    </div>
-
-                  ))}
-
-              </div>
-
-            ) : (
-
-              <div className="empty-wishlist">
-
-                <div>♡</div>
-
-                <p>
-                  Your wishlist is empty.
-                </p>
-
-                <small>
-                  Tap the heart on any product
-                  to save it.
-                </small>
-
-              </div>
-
-            )}
-
-          </div>
-
-        </div>
-      )}
-
-      {/* ADD TEAM PROFILE */}
-      {showMemberForm && (
-
-        <div
-          className="modal-overlay"
-          onClick={() =>
-            setShowMemberForm(false)
-          }
-        >
-
-          <div
-            className="form-card"
-            onClick={(e) => e.stopPropagation()}
-          >
-
-            <button
-              className="modal-close"
-              onClick={() =>
-                setShowMemberForm(false)
-              }
-            >
-              ✕
-            </button>
-
-            <span className="form-label">
-              TEAM PROFILE
-            </span>
-
-            <h2>{editingMemberId !== null ? "Edit Your Profile" : "Add Your Profile"}</h2>
-
-            <p className="form-subtitle">
-              Show other students what you can
-              contribute to a project or hackathon.
-            </p>
-
-            <form onSubmit={addMember}>
-
-              <div className="form-grid">
-
-                <label>
-                  Name *
-                  <input
-                    value={memberForm.name}
-                    onChange={(e) =>
-                      setMemberForm({
-                        ...memberForm,
-                        name: e.target.value,
-                      })
-                    }
-                    placeholder="Your name"
-                  />
-                </label>
-
-                <label>
-                  Role
-                  <select
-                    value={memberForm.role}
-                    onChange={(e) =>
-                      setMemberForm({
-                        ...memberForm,
-                        role: e.target.value,
-                      })
-                    }
-                  >
-                    <option>Coder</option>
-                    <option>Presenter</option>
-                    <option>Frontend Developer</option>
-                    <option>Backend Developer</option>
-                    <option>Data Analyst</option>
-                    <option>UI/UX Designer</option>
-                    <option>Documentation</option>
-                  </select>
-                </label>
-
-                <label>
-                  Skills *
-                  <input
-                    value={memberForm.skills}
-                    onChange={(e) =>
-                      setMemberForm({
-                        ...memberForm,
-                        skills: e.target.value,
-                      })
-                    }
-                    placeholder="C++, Python, DSA"
-                  />
-                </label>
-
-                <label>
-                  Experience
-                  <input
-                    value={memberForm.experience}
-                    onChange={(e) =>
-                      setMemberForm({
-                        ...memberForm,
-                        experience: e.target.value,
-                      })
-                    }
-                    placeholder="2 Hackathons"
-                  />
-                </label>
-
-                <label>
-                  College
-                  <input
-                    value={memberForm.college}
-                    onChange={(e) =>
-                      setMemberForm({
-                        ...memberForm,
-                        college: e.target.value,
-                      })
-                    }
-                    placeholder="Your college"
-                  />
-                </label>
-
-                <label>
-                  Availability
-                  <select
-                    value={memberForm.status}
-                    onChange={(e) =>
-                      setMemberForm({
-                        ...memberForm,
-                        status: e.target.value,
-                      })
-                    }
-                  >
-                    <option>Available</option>
-                    <option>Busy</option>
-                  </select>
-                </label>
-
-                <label>
-                  Contact Number *
-                  <input
-                    value={memberForm.phone}
-                    onChange={(e) =>
-                      setMemberForm({
-                        ...memberForm,
-                        phone: e.target.value
-                          .replace(/\D/g, "")
-                          .slice(0, 10),
-                      })
-                    }
-                    placeholder="10-digit number"
-                  />
-                </label>
-
-                <label>
-                  Email *
-                  <input
-                    type="email"
-                    value={memberForm.email}
-                    onChange={(e) =>
-                      setMemberForm({
-                        ...memberForm,
-                        email: e.target.value,
-                      })
-                    }
-                    placeholder="student@college.edu"
-                  />
-                </label>
-
-                <label>
-                  Profile Photo
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleMemberImage}
-                  />
-                </label>
-
-              </div>
-
-              {memberImagePreview && (
-                <img
-                  className="profile-upload-preview"
-                  src={memberImagePreview}
-                  alt="Profile preview"
-                />
-              )}
-
-              <label>
-                About You *
-                <textarea
-                  rows="4"
-                  value={memberForm.about}
-                  onChange={(e) =>
-                    setMemberForm({
-                      ...memberForm,
-                      about: e.target.value,
-                    })
-                  }
-                  placeholder="Tell students about your strengths..."
-                />
-              </label>
-
-              <button
-                className="primary-btn form-submit"
-                type="submit"
-              >
-                {editingMemberId !== null ? "Save Profile Changes →" : "Publish Team Profile →"}
-              </button>
-
-            </form>
-
-          </div>
-
-        </div>
-      )}
-
-      {/* TEAM PROFILE MODAL */}
-      {selectedTeammate && (
-
-        <div
-          className="modal-overlay"
-          onClick={() =>
-            setSelectedTeammate(null)
-          }
-        >
-
-          <div
-            className="form-card teammate-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
-
-            <button
-              className="modal-close"
-              onClick={() =>
-                setSelectedTeammate(null)
-              }
-            >
-              ✕
-            </button>
-
-            {selectedTeammate.image ? (
-              <img
-                className="profile-large-photo"
-                src={selectedTeammate.image}
-                alt={selectedTeammate.name}
-              />
-            ) : (
-              <div className="big-avatar">
-                {selectedTeammate.name.charAt(0)}
-              </div>
-            )}
-
-            <span className="form-label">
-              {selectedTeammate.role.toUpperCase()}
-            </span>
-
-            <h2>{selectedTeammate.name}</h2>
-
-            <p className="form-subtitle">
-              {selectedTeammate.college} ·{" "}
-              {selectedTeammate.status}
-            </p>
-
-            <div className="profile-box">
-              <strong>Skills</strong>
-
-              <div className="team-skills">
-                {selectedTeammate.skills.map(
-                  (skill) => (
-                    <span key={skill}>
-                      {skill}
-                    </span>
-                  )
-                )}
-              </div>
-            </div>
-
-            <div className="profile-box">
-              <strong>Rating</strong>
-
-              <p>
-                {selectedTeammate.rating == null
-                  ? "No reviews yet"
-                  : `⭐ ${selectedTeammate.rating}/5 · ${
-                      selectedTeammate.reviews || 0
-                    } reviews`}
-              </p>
-            </div>
-
-            <div className="profile-box">
-              <strong>Contact</strong>
-
-              <p>
-                📱 {selectedTeammate.phone}
-                <br />
-                📧 {selectedTeammate.email}
-              </p>
-            </div>
-
-            <div className="profile-box">
-              <strong>About</strong>
-
-              <p>{selectedTeammate.about}</p>
-            </div>
-
-            <div className="owner-actions modal-owner-actions">
-              <button
-                className="edit-profile-btn"
-                onClick={() => {
-                  const member = selectedTeammate;
-                  setSelectedTeammate(null);
-                  openMemberForm(member);
-                }}
-              >
-                ✎ Edit Profile
-              </button>
-              <button
-                className="delete-profile-btn"
-                onClick={() => deleteMember(selectedTeammate)}
-              >
-                🗑 Delete Profile
-              </button>
-            </div>
-
-            <button
-              className="primary-btn form-submit"
-              onClick={() =>
-                inviteMember(selectedTeammate)
-              }
-            >
-              {invitedMembers.includes(
-                selectedTeammate.id
-              )
-                ? "✓ Invited"
-                : "🤝 Invite to Team"}
-            </button>
-
-            {invitedMembers.includes(
-              selectedTeammate.id
-            ) && (
-              <button
-                className="review-btn large-review"
-                onClick={() => {
-                  setSelectedTeammate(null);
-                  openReview(selectedTeammate);
-                }}
-              >
-                ⭐ Give Review
-              </button>
-            )}
-
-          </div>
-
-        </div>
-      )}
-
-      {/* REVIEW */}
-      {reviewTarget && (
-
-        <div
-          className="modal-overlay"
-          onClick={() => setReviewTarget(null)}
-        >
-
-          <div
-            className="form-card review-card"
-            onClick={(e) => e.stopPropagation()}
-          >
-
-            <button
-              className="modal-close"
-              onClick={() =>
-                setReviewTarget(null)
-              }
-            >
-              ✕
-            </button>
-
-            <span className="form-label">
-              TEAM REVIEW
-            </span>
-
-            <h2>
-              Review {reviewTarget.name}
-            </h2>
-
-            <p className="form-subtitle">
-              Share your experience working with
-              this teammate.
-            </p>
-
-            <form onSubmit={submitReview}>
-
-              <div className="star-picker">
-
-                {[1, 2, 3, 4, 5].map((star) => (
-
-                  <button
-                    type="button"
-                    key={star}
-                    className={
-                      star <= reviewStars
-                        ? "star-active"
-                        : "star-off"
-                    }
-                    onClick={() =>
-                      setReviewStars(star)
-                    }
-                  >
-                    ★
-                  </button>
-
-                ))}
-
-              </div>
-
-              <textarea
-                rows="4"
-                value={reviewText}
-                onChange={(e) =>
-                  setReviewText(e.target.value)
-                }
-                placeholder="Write your review..."
-              />
-
-              <button
-                className="primary-btn form-submit"
-                type="submit"
-              >
-                Submit Review →
-              </button>
-
-            </form>
-
-            {memberReviews.length > 0 && (
-
-              <div className="review-history">
-
-                <h3>Previous Reviews</h3>
-
-                {memberReviews.map((review) => (
-
-                  <div
-                    className="review-item"
-                    key={review.id}
-                  >
-                    <strong>
-                      ⭐ {review.stars}/5 ·{" "}
-                      {review.by}
-                    </strong>
-
-                    <p>{review.text}</p>
-                  </div>
-
-                ))}
-
-              </div>
-
-            )}
-
-          </div>
-
-        </div>
-      )}
-
-      {/* TEAM FINDER MODAL */}
-      {showTeamFinder && (
-
-        <div
-          className="modal-overlay"
-          onClick={() =>
-            setShowTeamFinder(false)
-          }
-        >
-
-          <div
-            className="form-card"
-            onClick={(e) => e.stopPropagation()}
-          >
-
-            <button
-              className="modal-close"
-              onClick={() =>
-                setShowTeamFinder(false)
-              }
-            >
-              ✕
-            </button>
-
-            <span className="form-label">
-              TEAM MATCHING
-            </span>
-
-            <h2>Who do you need?</h2>
-
-            <p className="form-subtitle">
-              Choose the role you need for your
-              project or hackathon.
-            </p>
-
-            <div className="role-select-grid">
-
-              {roleButtons.map(([icon, role]) => (
-
-                <button
-                  key={role}
-                  className={
-                    teamRole === role
-                      ? "selected-role"
-                      : ""
-                  }
-                  onClick={() => {
-                    setTeamRole(role);
-                    setShowTeamFinder(false);
-                    scrollTo("team-finder");
-                  }}
-                >
-                  {icon} {role}
-                </button>
-
-              ))}
-
-            </div>
-
-          </div>
-
-        </div>
-      )}
-
-      {/* ADMIN */}
-      {showAdmin && (
-
-        <div
-          className="modal-overlay"
-          onClick={() => setShowAdmin(false)}
-        >
-
-          <div
-            className="form-card admin-card"
-            onClick={(e) => e.stopPropagation()}
-          >
-
-            <button
-              className="modal-close"
-              onClick={() => setShowAdmin(false)}
-            >
-              ✕
-            </button>
-
-            <span className="form-label">
-              ADMIN DASHBOARD
-            </span>
-
-            <h2>UniTrade Admin Panel</h2>
-
-            <p className="form-subtitle">
-              Manage marketplace activity from one
-              place.
-            </p>
-
-            <div className="admin-stats">
-
-              <div>
-                <strong>{products.length}</strong>
-                <span>Total Listings</span>
-              </div>
-
-              <div>
-                <strong>
-                  {
-                    new Set(
-                      products.map(
-                        (product) => product.seller
-                      )
-                    ).size
-                  }
-                </strong>
-                <span>Sellers</span>
-              </div>
-
-              <div>
-                <strong>{wishlist.length}</strong>
-                <span>Wishlist Saves</span>
-              </div>
-
-            </div>
-
-            <h3 className="admin-heading">
-              Recent Listings
-            </h3>
-
-            <div className="admin-list">
-
-              {products
-                .slice(0, 8)
-                .map((product) => (
-
-                  <div
-                    className="admin-row"
-                    key={product.id}
-                  >
-
-                    <div className="admin-row-icon">
-                      {product.image ? (
-                        <img
-                          src={product.image}
-                          alt=""
-                        />
-                      ) : (
-                        product.icon
-                      )}
-                    </div>
-
-                    <div className="admin-row-info">
-                      <strong>
-                        {product.title}
-                      </strong>
-
-                      <small>
-                        {product.seller} ·{" "}
-                        {product.price}
-                      </small>
-                    </div>
-
-                    <button
-                      className="admin-remove"
-                      onClick={() => {
-                        setProducts((items) =>
-                          items.filter(
-                            (item) =>
-                              item.id !== product.id
-                          )
-                        );
-
-                        notify(
-                          "Listing removed by admin"
-                        );
-                      }}
-                    >
-                      Remove
-                    </button>
-
-                  </div>
-
-                ))}
-
-            </div>
-
-          </div>
-
-        </div>
-      )}
-
-      {/* TOAST */}
-      {toast && (
-        <div className="toast">
-          {toast}
-        </div>
-      )}
-
+      {toast && <div className="toast">{toast}</div>}
+    </div>
+  );
+}
+
+function RatingForm({ note, onSubmit }) {
+  const [rating, setRating] = useState("");
+  return (
+    <div className="form">
+      <div className="info-box">You can rate this note because you have already accessed it.</div>
+      <h3>{note.title}</h3>
+      <div className="rating-picker">
+        {[1, 2, 3, 4, 5].map(n => <button type="button" key={n} className={Number(rating) >= n ? "picked" : ""} onClick={() => setRating(n)}>⭐</button>)}
+      </div>
+      <button className="primary-btn" onClick={() => onSubmit(rating)} disabled={!rating}>Submit Rating</button>
+    </div>
+  );
+}
+
+function AiCard({ icon, title, text, button, onClick }) {
+  return <article className="ai-card"><div className="ai-icon">{icon}</div><h3>{title}</h3><p>{text}</p><button className="small-btn" onClick={onClick}>{button}</button></article>;
+}
+
+function BusinessCard({ icon, title, text, value }) {
+  return <article className="business-card"><div className="ai-icon">{icon}</div><span className="tag">{value}</span><h3>{title}</h3><p>{text}</p></article>;
+}
+
+function SectionTitle({ eyebrow, title, text }) {
+  return <div className="section-title"><span className="eyebrow">{eyebrow}</span><h2>{title}</h2>{text && <p>{text}</p>}</div>;
+}
+
+function Metric({ n, t }) {
+  return <div className="metric"><b>{n}</b><span>{t}</span></div>;
+}
+
+function Modal({ title, children, onClose }) {
+  return (
+    <div className="modal-overlay" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal">
+        <button className="modal-close" onClick={onClose}>✕</button>
+        <span className="eyebrow">UNITRADE</span>
+        <h2>{title}</h2>
+        {children}
+      </div>
     </div>
   );
 }
