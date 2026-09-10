@@ -44,7 +44,7 @@ function readStorage(key, fallback) {
   }
 }
 
-const API_BASE = "https://unitrade-backend.onrender.com/api";
+const API_BASE = "https://unitrade-g70n.onrender.com/api";
 const API_ORIGIN = API_BASE.replace(/\/api$/, "");
 
 function assetUrl(path) {
