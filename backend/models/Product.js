@@ -29,6 +29,11 @@ const productSchema = new mongoose.Schema(
       default: "Good"
     },
 
+    location: {
+      type: String,
+      default: ""
+    },
+
     image: {
       type: String,
       default: ""

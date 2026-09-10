@@ -50,6 +50,23 @@ const userSchema = new mongoose.Schema(
     isVerified: {
       type: Boolean,
       default: false
+    },
+
+    // ================= LOGIN OTP =================
+
+    loginOtpHash: {
+      type: String,
+      default: ""
+    },
+
+    loginOtpExpiresAt: {
+      type: Date,
+      default: null
+    },
+
+    loginOtpAttempts: {
+      type: Number,
+      default: 0
     }
   },
   {

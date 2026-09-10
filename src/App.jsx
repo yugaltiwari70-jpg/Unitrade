@@ -44,7 +44,7 @@ function readStorage(key, fallback) {
   }
 }
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://unitrade-backend.onrender.com/api";
 const API_ORIGIN = API_BASE.replace(/\/api$/, "");
 
 function assetUrl(path) {
@@ -64,11 +64,7 @@ async function apiFetch(endpoint, { method = "GET", token = "", body, formData =
   });
   let data = {};
   try { data = await response.json(); } catch { data = {}; }
-  if (!response.ok) {
-    const error = new Error(data.message || `Request failed (${response.status})`);
-    error.status = response.status;
-    throw error;
-  }
+  if (!response.ok) throw new Error(data.message || `Request failed (${response.status})`);
   return data;
 }
 
@@ -77,7 +73,18 @@ async function authRequest(endpoint, payload) {
 }
 
 function mapListing(item) {
-  return { ...item, id: item._id || item.id, image: assetUrl(item.image), icon: item.icon || "📦" };
+  const seller =
+    typeof item.seller === "object"
+      ? item.seller?.name || item.sellerName || "Student"
+      : item.seller || item.sellerName || "Student";
+
+  return {
+    ...item,
+    id: item._id || item.id,
+    seller,
+    image: assetUrl(item.image),
+    icon: item.icon || "📦"
+  };
 }
 function mapNote(item) {
   return { ...item, id: item._id || item.id, author: item.uploader || item.author, image: assetUrl(item.coverImage || item.image), fileName: item.fileName || "", ratings: item.ratings || [] };
@@ -101,7 +108,14 @@ function App() {
   const [authToken, setAuthToken] = useState(() => localStorage.getItem("unitrade-token") || "");
   const [authMode, setAuthMode] = useState("login");
   const [authLoading, setAuthLoading] = useState(false);
+  const [loginStep, setLoginStep] = useState("credentials");
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginOtp, setLoginOtp] = useState("");
+  const [registerStep, setRegisterStep] = useState("credentials");
+  const [registerEmail, setRegisterEmail] = useState("");
+  const [registerOtp, setRegisterOtp] = useState("");
   const [modal, setModal] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [marketCategory, setMarketCategory] = useState("All");
   const [noteSearch, setNoteSearch] = useState("");
@@ -119,27 +133,44 @@ function App() {
 
   useEffect(() => {
     let cancelled = false;
-    async function bootstrap() {
+
+    async function loadMarketplace() {
       try {
-        const [listingData, noteData, resourceData, teamData] = await Promise.all([
-          apiFetch("/listings"), apiFetch("/notes"), apiFetch("/resources"), apiFetch("/team")
-        ]);
+        const listingData = await apiFetch("/products");
         if (cancelled) return;
-        const mergeKeepExisting = (existing, incoming, mapper) => {
-          const mapped = Array.isArray(incoming) ? incoming.map(mapper) : [];
-          const incomingKeys = new Set(mapped.map(x => `${x.title || x.name || ""}|${x.subject || x.role || ""}`));
-          const keep = existing.filter(x => !incomingKeys.has(`${x.title || x.name || ""}|${x.subject || x.role || ""}`));
-          return [...mapped, ...keep];
-        };
-        setProducts(prev => mergeKeepExisting(prev.length ? prev : seedProducts, listingData, mapListing));
-        setNotes(prev => mergeKeepExisting(prev.length ? prev : seedNotes, noteData, mapNote));
-        setResources(prev => mergeKeepExisting(prev.length ? prev : seedResources, resourceData, mapResource));
-        setMembers(prev => mergeKeepExisting(prev.length ? prev : seedMembers, teamData, mapMember));
+        // Marketplace is driven by MongoDB data. Only use demo products if the API itself fails.
+        setProducts(Array.isArray(listingData) ? listingData.map(mapListing) : []);
       } catch (error) {
-        console.warn("UniTrade API bootstrap failed; using local demo data.", error.message);
+        console.warn("Marketplace API failed; using local demo products.", error.message);
+        if (!cancelled) setProducts(prev => prev.length ? prev : seedProducts);
       }
     }
-    bootstrap();
+
+    async function loadOtherData() {
+      const results = await Promise.allSettled([
+        apiFetch("/notes"),
+        apiFetch("/resources"),
+        apiFetch("/team")
+      ]);
+      if (cancelled) return;
+
+      const [noteResult, resourceResult, teamResult] = results;
+      if (noteResult.status === "fulfilled") {
+        const data = noteResult.value;
+        setNotes(Array.isArray(data) ? data.map(mapNote) : []);
+      }
+      if (resourceResult.status === "fulfilled") {
+        const data = resourceResult.value;
+        setResources(Array.isArray(data) ? data.map(mapResource) : []);
+      }
+      if (teamResult.status === "fulfilled") {
+        const data = teamResult.value;
+        setMembers(Array.isArray(data) ? data.map(mapMember) : []);
+      }
+    }
+
+    loadMarketplace();
+    loadOtherData();
     return () => { cancelled = true; };
   }, []);
 
@@ -147,14 +178,10 @@ function App() {
     if (!authToken) return;
     apiFetch("/auth/me", { token: authToken })
       .then(result => setUser(prev => ({ ...(prev || {}), ...(result.user || {}) })))
-      .catch(error => {
-        // Keep the saved local session when the backend is temporarily offline.
-        // Only clear it when the backend explicitly says the token is invalid.
-        if (error.status === 401 || error.status === 403) {
-          localStorage.removeItem("unitrade-token");
-          setAuthToken("");
-          setUser(null);
-        }
+      .catch(() => {
+        localStorage.removeItem("unitrade-token");
+        setAuthToken("");
+        setUser(null);
       });
   }, [authToken]);
 
@@ -225,6 +252,26 @@ function App() {
     [members, role, search]
   );
 
+  const finishLogin = (result, fallbackEmail = "") => {
+    localStorage.setItem("unitrade-token", result.token || "");
+    setAuthToken(result.token || "");
+    const loggedUser = {
+      ...(result.user || {}),
+      name: result.user?.name || "Student",
+      email: result.user?.email || fallbackEmail,
+      college: result.user?.college || "Campus",
+      course: result.user?.course || "",
+      joined: "2026",
+    };
+    localStorage.setItem("unitrade-user", JSON.stringify(loggedUser));
+    setUser(loggedUser);
+    setLoginStep("credentials");
+    setLoginEmail("");
+    setLoginOtp("");
+    setModal(null);
+    notify(`Welcome back, ${loggedUser.name}! 🎓`);
+  };
+
   const submitLogin = async (e) => {
     e.preventDefault();
     if (authLoading) return;
@@ -235,35 +282,66 @@ function App() {
     const password = data.get("password");
     const college = data.get("college")?.trim() || "";
     const course = data.get("course")?.trim() || "";
-
-    if (!email || !password || (authMode === "register" && !name)) {
-      return notify(authMode === "register" ? "Fill all required sign-up fields" : "Enter email and password");
-    }
+    const otp = data.get("otp")?.trim();
 
     try {
       setAuthLoading(true);
-      const result = await authRequest(authMode === "register" ? "register" : "login",
-        authMode === "register"
-          ? { name, email, password, college, course }
-          : { email, password }
-      );
 
-      localStorage.setItem("unitrade-token", result.token || "");
-      setAuthToken(result.token || "");
+      if (authMode === "login" && loginStep === "otp") {
+        if (!loginEmail || !/^\d{6}$/.test(otp || "")) {
+          notify("Enter the 6-digit OTP");
+          return;
+        }
+        const result = await authRequest("verify-login-otp", { email: loginEmail, otp });
+        finishLogin(result, loginEmail);
+        return;
+      }
 
-      const loggedUser = {
-        ...(result.user || {}),
-        name: result.user?.name || name || "Student",
-        email: result.user?.email || email,
-        college: result.user?.college || college || "Campus",
-        course: result.user?.course || course || "",
-        joined: "2026",
-      };
+      if (authMode === "register" && registerStep === "otp") {
+        if (!registerEmail || !/^\d{6}$/.test(registerOtp || "")) {
+          notify("Enter the 6-digit OTP");
+          return;
+        }
+        const result = await authRequest("verify-register-otp", { email: registerEmail, otp: registerOtp });
+        localStorage.setItem("unitrade-token", result.token || "");
+        setAuthToken(result.token || "");
+        const loggedUser = {
+          ...(result.user || {}),
+          name: result.user?.name || "Student",
+          email: result.user?.email || registerEmail,
+          college: result.user?.college || "Campus",
+          course: result.user?.course || "",
+          joined: "2026",
+        };
+        localStorage.setItem("unitrade-user", JSON.stringify(loggedUser));
+        setUser(loggedUser);
+        setRegisterStep("credentials");
+        setRegisterEmail("");
+        setRegisterOtp("");
+        setModal(null);
+        notify("Account created and email verified successfully! 🎓");
+        return;
+      }
 
-      localStorage.setItem("unitrade-user", JSON.stringify(loggedUser));
-      setUser(loggedUser);
-      setModal(null);
-      notify(authMode === "register" ? "Account created successfully! 🎓" : `Welcome back, ${loggedUser.name}! 🎓`);
+      if (!email || !password || (authMode === "register" && !name)) {
+        notify(authMode === "register" ? "Fill all required sign-up fields" : "Enter email and password");
+        return;
+      }
+
+      if (authMode === "register") {
+        await authRequest("request-register-otp", { name, email, password, college, course });
+        setRegisterEmail(email);
+        setRegisterOtp("");
+        setRegisterStep("otp");
+        notify("OTP sent to your email 📩");
+        return;
+      }
+
+      await authRequest("request-login-otp", { email, password });
+      setLoginEmail(email);
+      setLoginOtp("");
+      setLoginStep("otp");
+      notify("OTP sent to your registered email 📩");
     } catch (error) {
       notify(error.message || "Authentication failed");
     } finally {
@@ -298,32 +376,15 @@ function App() {
     }
     try {
       const body = new FormData();
-      ["title", "category", "price", "condition", "location", "seller"].forEach(k => body.append(k, listing[k] ?? ""));
+      ["title", "category", "price", "condition", "location"].forEach(k => body.append(k, listing[k] ?? ""));
       body.append("image", listing.imageFile);
-      const created = await apiFetch("/listings", { method: "POST", token: authToken, body, formData: true });
-      setProducts(p => [mapListing(created), ...p]);
+      const result = await apiFetch("/products", { method: "POST", token: authToken, body, formData: true });
+      setProducts(p => [mapListing(result.product || result), ...p]);
       setListing({ title: "", category: "Books", price: "", condition: "Good", location: "", seller: "", image: "", imageFile: null });
       setModal(null);
       notify("Listing saved to UniTrade backend ✓");
     } catch (error) {
-      // If the backend is temporarily unavailable, keep the listing in this browser
-      // so the Publish Listing button still works during a demo/development run.
-      const localListing = {
-        id: `local-${Date.now()}`,
-        title: listing.title,
-        category: listing.category,
-        icon: "📦",
-        price: Number(listing.price),
-        condition: listing.condition,
-        seller: listing.seller || user?.name || "Student",
-        verified: true,
-        location: listing.location,
-        image: listing.image || "",
-      };
-      setProducts(p => [localListing, ...p]);
-      setListing({ title: "", category: "Books", price: "", condition: "Good", location: "", seller: "", image: "", imageFile: null });
-      setModal(null);
-      notify(`Listing saved locally. Backend unavailable right now.`);
+      notify(error.message || "Could not create listing");
     }
   };
   const addNote = async (e) => {
@@ -454,11 +515,9 @@ function App() {
   return (
     <div className="app">
       <nav className="navbar">
-        <button className="brand" onClick={() => go("home")}><span>♻</span><b>UniTrade</b></button>
-        <div className="nav-links">
-          {nav.map(([id, label]) => (
-            <button key={id} className={tab === id ? "active" : ""} onClick={() => go(id)}>{label}</button>
-          ))}
+        <div className="navbar-left">
+          <button className="menu-btn" aria-label="Open menu" onClick={() => setSidebarOpen(true)}>☰</button>
+          <button className="brand" onClick={() => go("home")}><span>♻</span><b>UniTrade</b></button>
         </div>
         <div className="nav-actions">
           <button className="icon-btn" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>{theme === "dark" ? "☀️" : "🌙"}</button>
@@ -471,9 +530,25 @@ function App() {
                 localStorage.removeItem("unitrade-user");
                 notify("Logged out");
               }}>Logout</button>
-            : <button className="login-btn" onClick={() => { setAuthMode("login"); setModal("login"); }}>Login / Sign Up</button>}
+            : <button className="login-btn" onClick={() => { setAuthMode("login"); setLoginStep("credentials"); setLoginOtp(""); setRegisterStep("credentials"); setRegisterOtp(""); setRegisterEmail(""); setModal("login"); }}>Login / Sign Up</button>}
         </div>
       </nav>
+
+      {sidebarOpen && (
+        <div className="sidebar-overlay" onMouseDown={e => { if (e.target === e.currentTarget) setSidebarOpen(false); }}>
+          <aside className="sidebar" onMouseDown={e => e.stopPropagation()}>
+            <div className="sidebar-header">
+              <div className="sidebar-brand"><span>♻</span><b>UniTrade</b></div>
+              <button className="sidebar-close" aria-label="Close menu" onClick={() => setSidebarOpen(false)}>✕</button>
+            </div>
+            <div className="sidebar-links">
+              {nav.map(([id, label]) => (
+                <button key={id} className={tab === id ? "active" : ""} onClick={() => { go(id); setSidebarOpen(false); }}>{label}</button>
+              ))}
+            </div>
+          </aside>
+        </div>
+      )}
 
       {tab === "home" && (
         <main>
@@ -691,29 +766,46 @@ function App() {
           {modal === "login" && (
             <form className="form" onSubmit={submitLogin}>
               <div className="auth-switch">
-                <button type="button" className={authMode === "login" ? "active" : ""} onClick={() => setAuthMode("login")}>Login</button>
-                <button type="button" className={authMode === "register" ? "active" : ""} onClick={() => setAuthMode("register")}>Create Account</button>
+                <button type="button" className={authMode === "login" ? "active" : ""} onClick={() => { setAuthMode("login"); setLoginStep("credentials"); setLoginOtp(""); }}>Login</button>
+                <button type="button" className={authMode === "register" ? "active" : ""} onClick={() => { setAuthMode("register"); setRegisterStep("credentials"); setRegisterOtp(""); }}>Create Account</button>
               </div>
 
-              {authMode === "register" && (
+              {authMode === "login" && loginStep === "otp" ? (
                 <>
-                  <label>Full Name<input name="name" placeholder="Your full name" required /></label>
-                  <div className="two">
-                    <label>College / Institution<input name="college" placeholder="Your college" required /></label>
-                    <label>Course<input name="course" placeholder="B.Tech IT" /></label>
+                  <div className="info-box"><b>Verify your email 📩</b><br />Enter the 6-digit OTP sent to <b>{loginEmail}</b>.</div>
+                  <label>Login OTP<input name="otp" inputMode="numeric" maxLength="6" pattern="\d{6}" value={loginOtp} onChange={e => setLoginOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="Enter 6-digit OTP" required /></label>
+                  <button className="primary-btn" disabled={authLoading}>{authLoading ? "Verifying..." : "Verify OTP →"}</button>
+                  <button type="button" className="secondary-btn" onClick={() => { setLoginStep("credentials"); setLoginOtp(""); }}>← Back</button>
+                </>
+              ) : authMode === "register" && registerStep === "otp" ? (
+                <>
+                  <div className="info-box"><b>Verify your email 📩</b><br />Enter the 6-digit OTP sent to <b>{registerEmail}</b>.</div>
+                  <label>Registration OTP<input name="otp" inputMode="numeric" maxLength="6" pattern="\d{6}" value={registerOtp} onChange={e => setRegisterOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="Enter 6-digit OTP" required /></label>
+                  <button className="primary-btn" disabled={authLoading}>{authLoading ? "Verifying..." : "Verify OTP →"}</button>
+                  <button type="button" className="secondary-btn" onClick={() => { setRegisterStep("credentials"); setRegisterOtp(""); }}>← Back</button>
+                </>
+              ) : (
+                <>
+                  {authMode === "register" && (
+                    <>
+                      <label>Full Name<input name="name" placeholder="Your full name" required /></label>
+                      <div className="two">
+                        <label>College / Institution<input name="college" placeholder="Your college" required /></label>
+                        <label>Course<input name="course" placeholder="B.Tech IT" /></label>
+                      </div>
+                    </>
+                  )}
+                  <label>College Email<input name="email" type="email" placeholder="student@college.edu" required /></label>
+                  <label>Password<input name="password" type="password" placeholder="Minimum 6 characters" minLength="6" required /></label>
+                  <div className="info-box">
+                    <b>{authMode === "register" ? "Create your real UniTrade account." : "Login with your UniTrade account."}</b>
+                    <br />A 6-digit OTP will be sent to your registered email for verification.
                   </div>
+                  <button className="primary-btn" disabled={authLoading}>
+                    {authLoading ? "Please wait..." : authMode === "register" ? "Send OTP & Create Account →" : "Send OTP →"}
+                  </button>
                 </>
               )}
-
-              <label>College Email<input name="email" type="email" placeholder="student@college.edu" required /></label>
-              <label>Password<input name="password" type="password" placeholder="Minimum 6 characters" minLength="6" required /></label>
-              <div className="info-box">
-                <b>{authMode === "register" ? "Create your real UniTrade account." : "Login with your UniTrade account."}</b>
-                <br />Your account is securely handled by the UniTrade backend using JWT authentication.
-              </div>
-              <button className="primary-btn" disabled={authLoading}>
-                {authLoading ? "Please wait..." : authMode === "register" ? "Create Account →" : "Login →"}
-              </button>
             </form>
           )}
 
@@ -728,7 +820,14 @@ function App() {
               <label>Condition<select value={listing.condition} onChange={e => setListing({...listing, condition:e.target.value})}><option>Like New</option><option>Excellent</option><option>Good</option></select></label>
               <label>Seller Name<input value={listing.seller} onChange={e => setListing({...listing, seller:e.target.value})} placeholder="Your name" required /></label>
               <label>Item Photo *<input type="file" accept="image/*" onChange={e => readImage(e.target.files?.[0], setListing)} required /></label>
-              {listing.image && <img className="upload-preview" src={listing.image} alt="Item preview" />}
+              {listing.image && (
+                <img
+                  className="upload-preview"
+                  src={listing.image}
+                  alt="Item preview"
+                  style={{ width: "610px", maxWidth: "100%", height: "520px", maxHeight: "520px", objectFit: "cover" }}
+                />
+              )}
               <button className="primary-btn">Publish Listing</button>
             </form>
           )}

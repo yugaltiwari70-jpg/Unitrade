@@ -1,10 +1,61 @@
 const express = require("express");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+
 const Product = require("../models/Product");
+const User = require("../models/User");
+const { authMiddleware } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 
-// ================= GET ALL PRODUCTS =================
+// =====================================================
+// IMAGE UPLOAD SETUP
+// =====================================================
+
+const uploadDir = path.join(__dirname, "../uploads/products");
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+
+  filename: (req, file, cb) => {
+    const extension = path.extname(file.originalname);
+
+    const fileName =
+      `product-${Date.now()}-${Math.round(Math.random() * 1e9)}${extension}`;
+
+    cb(null, fileName);
+  }
+});
+
+
+const upload = multer({
+  storage,
+
+  limits: {
+    fileSize: 5 * 1024 * 1024
+  },
+
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed"));
+    }
+  }
+});
+
+
+// =====================================================
+// GET ALL PRODUCTS
+// =====================================================
 
 router.get("/", async (req, res) => {
   try {
@@ -24,7 +75,9 @@ router.get("/", async (req, res) => {
 });
 
 
-// ================= GET SINGLE PRODUCT =================
+// =====================================================
+// GET SINGLE PRODUCT
+// =====================================================
 
 router.get("/:id", async (req, res) => {
   try {
@@ -52,69 +105,142 @@ router.get("/:id", async (req, res) => {
 });
 
 
-// ================= ADD PRODUCT =================
+// =====================================================
+// ADD PRODUCT
+// =====================================================
 
-router.post("/", async (req, res) => {
-  try {
-    const {
-      title,
-      description,
-      category,
-      price,
-      condition,
-      image,
-      seller,
-      sellerName,
-      college,
-      contact
-    } = req.body;
+router.post(
+  "/",
+  authMiddleware,
+  upload.single("image"),
+  async (req, res) => {
+    try {
 
-    if (!title || price === undefined || !seller) {
-      return res.status(400).json({
-        message: "Title, price and seller are required"
+      // -----------------------------------------------
+      // Logged-in user ID comes from JWT
+      // -----------------------------------------------
+
+      const userId = req.user.userId;
+
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.status(401).json({
+          message: "User account not found"
+        });
+      }
+
+
+      // -----------------------------------------------
+      // Form data
+      // -----------------------------------------------
+
+      const {
+        title,
+        description,
+        category,
+        price,
+        condition,
+        location,
+        contact
+      } = req.body;
+
+
+      // -----------------------------------------------
+      // Required fields
+      // -----------------------------------------------
+
+      if (
+        !title ||
+        title.trim() === "" ||
+        price === undefined ||
+        price === "" ||
+        !location ||
+        location.trim() === ""
+      ) {
+        return res.status(400).json({
+          message: "Title, price and location are required"
+        });
+      }
+
+
+      // -----------------------------------------------
+      // Image
+      // -----------------------------------------------
+
+      const image = req.file
+        ? `/uploads/products/${req.file.filename}`
+        : "";
+
+
+      // -----------------------------------------------
+      // Create product
+      // -----------------------------------------------
+
+      const product = await Product.create({
+
+        title: title.trim(),
+
+        description: description || "",
+
+        category: category || "Other",
+
+        price: Number(price),
+
+        condition: condition || "Good",
+
+        location: location.trim(),
+
+        image,
+
+        // IMPORTANT:
+        // Seller comes from JWT, not frontend
+        seller: user._id,
+
+        sellerName: user.name,
+
+        college: user.college || "",
+
+        contact: contact || "",
+
+        isVerifiedSeller: user.isVerified || false
+
+      });
+
+
+      // -----------------------------------------------
+      // Return populated product
+      // -----------------------------------------------
+
+      const populatedProduct = await Product.findById(product._id)
+        .populate("seller", "name email college isVerified");
+
+
+      res.status(201).json({
+        message: "Product listed successfully",
+        product: populatedProduct
+      });
+
+    } catch (error) {
+
+      console.error("Add product error:", error);
+
+      res.status(500).json({
+        message: error.message || "Failed to add product"
       });
     }
-
-    const product = await Product.create({
-      title,
-      description: description || "",
-      category: category || "Other",
-      price,
-      condition: condition || "Good",
-      image: image || "",
-      seller,
-      sellerName: sellerName || "",
-      college: college || "",
-      contact: contact || ""
-    });
-
-    res.status(201).json({
-      message: "Product listed successfully",
-      product
-    });
-
-  } catch (error) {
-    console.error("Add product error:", error);
-
-    res.status(500).json({
-      message: "Failed to add product"
-    });
   }
-});
+);
 
 
-// ================= UPDATE PRODUCT =================
+// =====================================================
+// UPDATE PRODUCT
+// =====================================================
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", authMiddleware, async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true
-      }
-    );
+
+    const product = await Product.findById(req.params.id);
 
     if (!product) {
       return res.status(404).json({
@@ -122,12 +248,51 @@ router.put("/:id", async (req, res) => {
       });
     }
 
+
+    // Only owner or admin can update
+    if (
+      product.seller.toString() !== req.user.userId &&
+      req.user.role !== "admin"
+    ) {
+      return res.status(403).json({
+        message: "You can only update your own listing"
+      });
+    }
+
+
+    const allowedFields = [
+      "title",
+      "description",
+      "category",
+      "price",
+      "condition",
+      "location",
+      "contact",
+      "status"
+    ];
+
+
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        product[field] = req.body[field];
+      }
+    });
+
+
+    await product.save();
+
+
+    const updatedProduct = await Product.findById(product._id)
+      .populate("seller", "name email college isVerified");
+
+
     res.json({
       message: "Product updated successfully",
-      product
+      product: updatedProduct
     });
 
   } catch (error) {
+
     console.error("Update product error:", error);
 
     res.status(500).json({
@@ -137,11 +302,14 @@ router.put("/:id", async (req, res) => {
 });
 
 
-// ================= DELETE PRODUCT =================
+// =====================================================
+// DELETE PRODUCT
+// =====================================================
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+
+    const product = await Product.findById(req.params.id);
 
     if (!product) {
       return res.status(404).json({
@@ -149,17 +317,79 @@ router.delete("/:id", async (req, res) => {
       });
     }
 
+
+    // Only owner or admin can delete
+    if (
+      product.seller.toString() !== req.user.userId &&
+      req.user.role !== "admin"
+    ) {
+      return res.status(403).json({
+        message: "You can only delete your own listing"
+      });
+    }
+
+
+    // Delete image from server
+    if (product.image) {
+
+      const imagePath = path.join(
+        __dirname,
+        "..",
+        product.image
+      );
+
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+
+
+    await Product.findByIdAndDelete(req.params.id);
+
+
     res.json({
       message: "Product deleted successfully"
     });
 
   } catch (error) {
+
     console.error("Delete product error:", error);
 
     res.status(500).json({
       message: "Failed to delete product"
     });
   }
+});
+
+
+// =====================================================
+// MULTER ERROR HANDLER
+// =====================================================
+
+router.use((error, req, res, next) => {
+
+  if (error instanceof multer.MulterError) {
+
+    if (error.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({
+        message: "Image must be under 5 MB"
+      });
+    }
+
+    return res.status(400).json({
+      message: error.message
+    });
+  }
+
+
+  if (error) {
+    return res.status(400).json({
+      message: error.message
+    });
+  }
+
+
+  next();
 });
 
 
