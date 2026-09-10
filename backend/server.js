@@ -11,32 +11,19 @@ const productRoutes = require("./routes/productRoutes");
 const app = express();
 
 // =========================
-// CORS CONFIGURATION
+// CORS
 // =========================
-const allowedOrigins = [
-  "https://unitrade-orcin.vercel.app",
-  "http://localhost:5173",
-  "http://localhost:5176"
-];
-
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Allow requests without an origin
-      // (for example, direct browser/API requests)
-      if (!origin) {
-        return callback(null, true);
-      }
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true
+    origin: true,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
+
+// Explicitly handle preflight requests
+app.options(/.*/, cors());
 
 // =========================
 // MIDDLEWARE
@@ -49,7 +36,7 @@ app.use(
 );
 
 // =========================
-// ROOT ROUTE
+// ROOT
 // =========================
 app.get("/", (req, res) => {
   res.json({
