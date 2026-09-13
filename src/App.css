@@ -1066,3 +1066,1760 @@ footer span {
     height:32px;
   }
 }
+/* =========================================================
+   UNITRADE PREMIUM ANIMATIONS
+   No functionality changes
+========================================================= */
+
+/* ---------- Global smooth interactions ---------- */
+
+button,
+a,
+input,
+select,
+textarea {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* ---------- Page entrance ---------- */
+
+main {
+  animation: pageEnter 0.55s ease both;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Navbar ---------- */
+
+.navbar {
+  animation: navbarEnter 0.45s ease both;
+}
+
+@keyframes navbarEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.brand:hover span {
+  transform: rotate(-10deg) scale(1.08);
+  box-shadow: 0 0 25px rgba(255, 45, 125, 0.35);
+}
+
+.icon-btn:hover {
+  transform: translateY(-2px) scale(1.04);
+}
+
+.login-btn:hover,
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(255, 45, 126, 0.28);
+}
+
+.secondary-btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 45, 126, 0.4);
+}
+
+.small-btn:hover,
+.wide-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* ---------- Home Hero ---------- */
+
+.hero-copy {
+  animation: heroCopyIn 0.8s cubic-bezier(.22,1,.36,1) both;
+}
+
+.hero-copy .eyebrow {
+  animation: fadeUp 0.55s 0.05s ease both;
+}
+
+.hero h1 {
+  animation: fadeUp 0.65s 0.15s ease both;
+}
+
+.hero-copy > p {
+  animation: fadeUp 0.65s 0.25s ease both;
+}
+
+.hero-buttons {
+  animation: fadeUp 0.65s 0.35s ease both;
+}
+
+.trust-row {
+  animation: fadeUp 0.65s 0.45s ease both;
+}
+
+@keyframes heroCopyIn {
+  from {
+    opacity: 0;
+    transform: translateX(-35px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Hero visual ---------- */
+
+.hero-visual {
+  animation: visualIn 0.9s 0.15s cubic-bezier(.22,1,.36,1) both;
+}
+
+@keyframes visualIn {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.hero-logo {
+  animation:
+    logoFloat 4s ease-in-out infinite,
+    logoGlow 3s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-10px) scale(1.025);
+  }
+}
+
+@keyframes logoGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 60px rgba(255, 45, 126, 0.10);
+  }
+
+  50% {
+    box-shadow: 0 0 95px rgba(255, 45, 126, 0.22);
+  }
+}
+
+.orbit-card {
+  animation: orbitFloat 4s ease-in-out infinite;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.orbit-card:hover {
+  transform: translateY(-7px) scale(1.03);
+  box-shadow: 0 20px 55px rgba(255, 45, 126, 0.16);
+}
+
+.orbit-card.one {
+  animation-delay: 0s;
+}
+
+.orbit-card.two {
+  animation-delay: 1s;
+}
+
+.orbit-card.three {
+  animation-delay: 2s;
+}
+
+@keyframes orbitFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+/* ---------- Feature cards ---------- */
+
+.feature-card {
+  animation: cardReveal 0.6s ease both;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.feature-card:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.feature-card:nth-child(2) {
+  animation-delay: 0.10s;
+}
+
+.feature-card:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.feature-card:nth-child(4) {
+  animation-delay: 0.20s;
+}
+
+.feature-card:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+.feature-card:nth-child(6) {
+  animation-delay: 0.30s;
+}
+
+.feature-card:hover {
+  transform: translateY(-7px);
+  border-color: rgba(255, 45, 126, 0.3);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+}
+
+.feature-card:hover i {
+  transform: scale(1.15) rotate(-5deg);
+}
+
+.feature-card i {
+  transition: transform 0.25s ease;
+}
+
+/* ---------- All cards ---------- */
+
+.product-card,
+.note-card,
+.resource-card,
+.member-card,
+.ai-card,
+.business-card,
+.price-card,
+.metric {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.product-card:hover,
+.note-card:hover,
+.resource-card:hover,
+.member-card:hover,
+.ai-card:hover,
+.business-card:hover,
+.price-card:hover,
+.metric:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 45, 126, 0.25);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+}
+
+/* ---------- Product cards stagger ---------- */
+
+.product-card,
+.note-card,
+.resource-card,
+.member-card,
+.ai-card,
+.business-card,
+.price-card {
+  animation: cardReveal 0.55s ease both;
+}
+
+.product-card:nth-child(1),
+.note-card:nth-child(1),
+.resource-card:nth-child(1),
+.member-card:nth-child(1),
+.ai-card:nth-child(1),
+.business-card:nth-child(1),
+.price-card:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.product-card:nth-child(2),
+.note-card:nth-child(2),
+.resource-card:nth-child(2),
+.member-card:nth-child(2),
+.ai-card:nth-child(2),
+.business-card:nth-child(2),
+.price-card:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.product-card:nth-child(3),
+.note-card:nth-child(3),
+.resource-card:nth-child(3),
+.member-card:nth-child(3),
+.ai-card:nth-child(3),
+.business-card:nth-child(3),
+.price-card:nth-child(3) {
+  animation-delay: 0.19s;
+}
+
+.product-card:nth-child(4),
+.note-card:nth-child(4),
+.resource-card:nth-child(4),
+.member-card:nth-child(4),
+.ai-card:nth-child(4),
+.business-card:nth-child(4),
+.price-card:nth-child(4) {
+  animation-delay: 0.26s;
+}
+
+.product-card:nth-child(5),
+.note-card:nth-child(5),
+.resource-card:nth-child(5),
+.member-card:nth-child(5),
+.ai-card:nth-child(5),
+.business-card:nth-child(5),
+.price-card:nth-child(5) {
+  animation-delay: 0.33s;
+}
+
+.product-card:nth-child(6),
+.note-card:nth-child(6),
+.resource-card:nth-child(6),
+.member-card:nth-child(6),
+.ai-card:nth-child(6),
+.business-card:nth-child(6),
+.price-card:nth-child(6) {
+  animation-delay: 0.40s;
+}
+
+@keyframes cardReveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Product images ---------- */
+
+.card-photo,
+.resource-photo,
+.member-photo,
+.upload-preview {
+  transition:
+    transform 0.35s ease,
+    filter 0.35s ease;
+}
+
+.product-card:hover .card-photo,
+.resource-card:hover .resource-photo {
+  transform: scale(1.035);
+}
+
+.member-card:hover .member-photo {
+  transform: scale(1.06);
+}
+
+/* ---------- Wishlist heart ---------- */
+
+.heart {
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.heart:hover {
+  transform: scale(1.12);
+  background: rgba(255, 45, 126, 0.18);
+}
+
+.heart:active {
+  animation: heartPop 0.3s ease;
+}
+
+@keyframes heartPop {
+  0% {
+    transform: scale(1);
+  }
+
+  45% {
+    transform: scale(1.35);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ---------- Tags ---------- */
+
+.tag,
+.verified,
+.available,
+.busy {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.tag:hover,
+.verified:hover,
+.available:hover,
+.busy:hover {
+  transform: translateY(-2px);
+}
+
+/* ---------- Search / form fields ---------- */
+
+.toolbar input:focus,
+.toolbar select:focus,
+.form input:focus,
+.form select:focus,
+.form textarea:focus {
+  border-color: rgba(255, 45, 126, 0.5);
+  box-shadow: 0 0 0 4px rgba(255, 45, 126, 0.07);
+  transform: translateY(-1px);
+}
+
+/* ---------- Filter chips ---------- */
+
+.chips button,
+.resource-categories button {
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.chips button:hover,
+.resource-categories button:hover {
+  transform: translateY(-2px);
+}
+
+/* ---------- Metrics ---------- */
+
+.metric b {
+  transition: transform 0.25s ease;
+}
+
+.metric:hover b {
+  transform: scale(1.08);
+}
+
+/* ---------- AI cards ---------- */
+
+.ai-icon {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.ai-card:hover .ai-icon,
+.business-card:hover .ai-icon {
+  transform: scale(1.18) rotate(-6deg);
+}
+
+/* ---------- Pricing ---------- */
+
+.featured-price {
+  animation:
+    cardReveal 0.55s ease both,
+    premiumPulse 3s ease-in-out infinite;
+}
+
+@keyframes premiumPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 45, 126, 0.35),
+      0 15px 45px rgba(255, 45, 126, 0.10);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255, 45, 126, 0.55),
+      0 20px 60px rgba(255, 45, 126, 0.18);
+  }
+}
+
+/* ---------- Dashboard ---------- */
+
+.dash-profile {
+  animation: profileReveal 0.6s ease both;
+}
+
+.dash-stats .metric {
+  animation: cardReveal 0.55s ease both;
+}
+
+.dash-stats .metric:nth-child(1) {
+  animation-delay: 0.08s;
+}
+
+.dash-stats .metric:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.dash-stats .metric:nth-child(3) {
+  animation-delay: 0.24s;
+}
+
+.dash-stats .metric:nth-child(4) {
+  animation-delay: 0.32s;
+}
+
+@keyframes profileReveal {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ---------- Verification banner ---------- */
+
+.verification-banner {
+  animation: bannerReveal 0.6s ease both;
+}
+
+@keyframes bannerReveal {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ---------- Modal ---------- */
+
+.modal-overlay {
+  animation: overlayIn 0.22s ease both;
+}
+
+.modal {
+  animation: modalIn 0.35s cubic-bezier(.22,1,.36,1) both;
+}
+
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(25px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-close:hover {
+  transform: rotate(90deg) scale(1.08);
+}
+
+/* ---------- Toast ---------- */
+
+.toast {
+  animation:
+    toastIn 0.35s cubic-bezier(.22,1,.36,1) both;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(35px) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+}
+
+/* ---------- Rating stars ---------- */
+
+.rating-picker button {
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+.rating-picker button:hover {
+  transform: scale(1.25) rotate(-5deg);
+}
+
+/* ---------- Sidebar ---------- */
+
+.sidebar {
+  animation: sidebarPremiumIn 0.32s cubic-bezier(.22,1,.36,1) both;
+}
+
+.sidebar-links button {
+  animation: sidebarLinkIn 0.35s ease both;
+}
+
+.sidebar-links button:nth-child(1) {
+  animation-delay: 0.04s;
+}
+
+.sidebar-links button:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.sidebar-links button:nth-child(3) {
+  animation-delay: 0.12s;
+}
+
+.sidebar-links button:nth-child(4) {
+  animation-delay: 0.16s;
+}
+
+.sidebar-links button:nth-child(5) {
+  animation-delay: 0.20s;
+}
+
+.sidebar-links button:nth-child(6) {
+  animation-delay: 0.24s;
+}
+
+.sidebar-links button:nth-child(7) {
+  animation-delay: 0.28s;
+}
+
+.sidebar-links button:nth-child(8) {
+  animation-delay: 0.32s;
+}
+
+@keyframes sidebarPremiumIn {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes sidebarLinkIn {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ---------- Respect reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Mobile ---------- */
+
+@media (max-width: 650px) {
+  .hero-copy {
+    animation-duration: 0.6s;
+  }
+
+  .hero-visual {
+    animation-duration: 0.65s;
+  }
+
+  .orbit-card {
+    animation-duration: 5s;
+  }
+
+  .product-card:hover,
+  .note-card:hover,
+  .resource-card:hover,
+  .member-card:hover,
+  .ai-card:hover,
+  .business-card:hover,
+  .price-card:hover {
+    transform: translateY(-3px);
+  }
+}
+/* =========================================================
+   🚀 UNITRADE PREMIUM / NATIONAL LEVEL ANIMATION PACK
+   Visual-only upgrade — existing functionality untouched
+   ========================================================= */
+
+/* ---------- GLOBAL SMOOTHNESS ---------- */
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+input,
+select,
+textarea,
+.feature-card,
+.product-card,
+.note-card,
+.resource-card,
+.member-card,
+.metric,
+.ai-card,
+.business-card,
+.price-card,
+.orbit-card {
+  transition:
+    transform .28s cubic-bezier(.2,.8,.2,1),
+    box-shadow .28s ease,
+    border-color .28s ease,
+    background .28s ease,
+    opacity .28s ease,
+    filter .28s ease;
+}
+
+/* ---------- PREMIUM BACKGROUND ---------- */
+
+.app {
+  position: relative;
+  isolation: isolate;
+  overflow-x: hidden;
+  background:
+    radial-gradient(
+      circle at 80% 0%,
+      rgba(255,45,126,.13),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 10% 30%,
+      rgba(151,71,255,.11),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 50% 100%,
+      rgba(255,45,126,.06),
+      transparent 32%
+    );
+}
+
+.app::before {
+  content: "";
+  position: fixed;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  top: 10%;
+  left: -180px;
+  background: rgba(156,92,255,.08);
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: -1;
+  animation: utAmbientOne 12s ease-in-out infinite alternate;
+}
+
+.app::after {
+  content: "";
+  position: fixed;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  right: -160px;
+  bottom: 8%;
+  background: rgba(255,45,126,.07);
+  filter: blur(85px);
+  pointer-events: none;
+  z-index: -1;
+  animation: utAmbientTwo 15s ease-in-out infinite alternate;
+}
+
+@keyframes utAmbientOne {
+  0% {
+    transform: translate(0,0) scale(1);
+  }
+  50% {
+    transform: translate(100px,80px) scale(1.18);
+  }
+  100% {
+    transform: translate(40px,180px) scale(.95);
+  }
+}
+
+@keyframes utAmbientTwo {
+  0% {
+    transform: translate(0,0) scale(1);
+  }
+  50% {
+    transform: translate(-100px,-70px) scale(1.15);
+  }
+  100% {
+    transform: translate(-40px,-150px) scale(.92);
+  }
+}
+
+/* ---------- NAVBAR ---------- */
+
+.navbar {
+  animation: utNavbar .7s cubic-bezier(.2,.8,.2,1) both;
+}
+
+@keyframes utNavbar {
+  from {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.brand {
+  transition: transform .3s ease;
+}
+
+.brand:hover {
+  transform: translateY(-2px);
+}
+
+.brand span {
+  animation: utBrandGlow 3s ease-in-out infinite;
+}
+
+@keyframes utBrandGlow {
+  0%,100% {
+    box-shadow: 0 0 0 rgba(255,45,126,0);
+  }
+  50% {
+    box-shadow:
+      0 0 22px rgba(255,45,126,.35),
+      0 0 40px rgba(156,92,255,.18);
+  }
+}
+
+.nav-actions .icon-btn:hover {
+  transform: translateY(-2px) scale(1.04);
+}
+
+.login-btn:hover,
+.primary-btn:hover,
+.wide-btn:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 14px 35px rgba(255,45,126,.25),
+    0 0 22px rgba(163,76,255,.13);
+}
+
+.login-btn:active,
+.primary-btn:active,
+.secondary-btn:active,
+.small-btn:active,
+.wide-btn:active {
+  transform: scale(.96);
+}
+
+/* ---------- PREMIUM BUTTON SHINE ---------- */
+
+.primary-btn,
+.login-btn,
+.wide-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.primary-btn::after,
+.login-btn::after,
+.wide-btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 65%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgba(255,255,255,.28),
+    transparent
+  );
+  transform: skewX(-20deg);
+  animation: utButtonShine 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes utButtonShine {
+  0%,65% {
+    left: -120%;
+  }
+  85%,100% {
+    left: 140%;
+  }
+}
+
+/* ---------- HERO ENTRANCE ---------- */
+
+.hero-copy {
+  animation: utHeroCopy .9s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.hero-copy .eyebrow {
+  animation: utFadeUp .65s .08s both;
+}
+
+.hero-copy h1 {
+  animation: utFadeUp .75s .16s both;
+}
+
+.hero-copy p {
+  animation: utFadeUp .75s .25s both;
+}
+
+.hero-buttons {
+  animation: utFadeUp .75s .34s both;
+}
+
+.trust-row {
+  animation: utFadeUp .75s .43s both;
+}
+
+@keyframes utHeroCopy {
+  from {
+    opacity: 0;
+    transform: translateX(-35px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes utFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- HERO VISUAL ---------- */
+
+.hero-visual {
+  animation: utHeroVisual 1s .15s cubic-bezier(.2,.8,.2,1) both;
+}
+
+@keyframes utHeroVisual {
+  from {
+    opacity: 0;
+    transform: scale(.82);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ---------- HERO LOGO PREMIUM GLOW ---------- */
+
+.hero-logo {
+  position: relative;
+  animation:
+    utLogoFloat 5s ease-in-out infinite,
+    utLogoPulse 4s ease-in-out infinite;
+}
+
+.hero-logo::before {
+  content: "";
+  position: absolute;
+  inset: -22px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,45,126,.16);
+  animation: utRing 5s linear infinite;
+}
+
+.hero-logo::after {
+  content: "";
+  position: absolute;
+  inset: -45px;
+  border-radius: 50%;
+  border: 1px dashed rgba(156,92,255,.16);
+  animation: utRingReverse 10s linear infinite;
+}
+
+@keyframes utLogoFloat {
+  0%,100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-13px);
+  }
+}
+
+@keyframes utLogoPulse {
+  0%,100% {
+    box-shadow:
+      0 0 55px rgba(255,45,126,.10),
+      0 0 100px rgba(156,92,255,.05);
+  }
+  50% {
+    box-shadow:
+      0 0 85px rgba(255,45,126,.23),
+      0 0 140px rgba(156,92,255,.12);
+  }
+}
+
+@keyframes utRing {
+  from {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.04);
+  }
+  to {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes utRingReverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+/* ---------- ORBIT CARDS ---------- */
+
+.orbit-card {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: utOrbitIn .8s both;
+}
+
+.orbit-card.one {
+  animation:
+    utOrbitIn .8s .35s both,
+    utOrbitOne 5s 1.2s ease-in-out infinite;
+}
+
+.orbit-card.two {
+  animation:
+    utOrbitIn .8s .48s both,
+    utOrbitTwo 5.5s 1.3s ease-in-out infinite;
+}
+
+.orbit-card.three {
+  animation:
+    utOrbitIn .8s .61s both,
+    utOrbitThree 5.2s 1.4s ease-in-out infinite;
+}
+
+@keyframes utOrbitIn {
+  from {
+    opacity: 0;
+    transform: scale(.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes utOrbitOne {
+  0%,100% {
+    transform: translate(0,0);
+  }
+  50% {
+    transform: translate(8px,-12px);
+  }
+}
+
+@keyframes utOrbitTwo {
+  0%,100% {
+    transform: translate(0,0);
+  }
+  50% {
+    transform: translate(-10px,10px);
+  }
+}
+
+@keyframes utOrbitThree {
+  0%,100% {
+    transform: translate(0,0);
+  }
+  50% {
+    transform: translate(10px,8px);
+  }
+}
+
+.orbit-card:hover {
+  transform: translateY(-6px) scale(1.03) !important;
+  border-color: rgba(255,45,126,.35);
+  box-shadow:
+    0 20px 50px rgba(0,0,0,.30),
+    0 0 25px rgba(255,45,126,.08);
+}
+
+/* ---------- FEATURE CARDS ---------- */
+
+.feature-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      120deg,
+      transparent 30%,
+      rgba(255,255,255,.07),
+      transparent 70%
+    );
+  transform: translateX(-120%);
+  transition: transform .7s ease;
+}
+
+.feature-card:hover::before {
+  transform: translateX(120%);
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(255,45,126,.25);
+  box-shadow:
+    0 18px 45px rgba(0,0,0,.22),
+    0 0 25px rgba(255,45,126,.06);
+}
+
+.feature-card i {
+  transition: transform .35s ease;
+}
+
+.feature-card:hover i {
+  transform: scale(1.18) rotate(-5deg);
+}
+
+/* ---------- SECTION TITLE ---------- */
+
+.section-title,
+.notes-hero {
+  animation: utSectionReveal .7s cubic-bezier(.2,.8,.2,1) both;
+}
+
+@keyframes utSectionReveal {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- ALL CONTENT CARDS ---------- */
+
+.product-card,
+.note-card,
+.resource-card,
+.member-card,
+.metric,
+.ai-card,
+.business-card,
+.price-card {
+  animation: utCardReveal .65s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.product-card:hover,
+.note-card:hover,
+.resource-card:hover,
+.member-card:hover,
+.ai-card:hover,
+.business-card:hover,
+.price-card:hover {
+  transform: translateY(-9px);
+  border-color: rgba(255,45,126,.28);
+  box-shadow:
+    0 22px 55px rgba(0,0,0,.24),
+    0 0 30px rgba(255,45,126,.07);
+}
+
+@keyframes utCardReveal {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---------- CARD STAGGER ---------- */
+
+.product-card:nth-child(2),
+.note-card:nth-child(2),
+.resource-card:nth-child(2),
+.member-card:nth-child(2),
+.feature-card:nth-child(2) {
+  animation-delay: .08s;
+}
+
+.product-card:nth-child(3),
+.note-card:nth-child(3),
+.resource-card:nth-child(3),
+.member-card:nth-child(3),
+.feature-card:nth-child(3) {
+  animation-delay: .16s;
+}
+
+.product-card:nth-child(4),
+.note-card:nth-child(4),
+.resource-card:nth-child(4),
+.member-card:nth-child(4),
+.feature-card:nth-child(4) {
+  animation-delay: .24s;
+}
+
+.product-card:nth-child(5),
+.note-card:nth-child(5),
+.resource-card:nth-child(5),
+.member-card:nth-child(5),
+.feature-card:nth-child(5) {
+  animation-delay: .32s;
+}
+
+.product-card:nth-child(6),
+.note-card:nth-child(6),
+.resource-card:nth-child(6),
+.member-card:nth-child(6),
+.feature-card:nth-child(6) {
+  animation-delay: .40s;
+}
+
+/* ---------- PRODUCT / NOTE / RESOURCE IMAGES ---------- */
+
+.card-photo,
+.resource-photo,
+.member-photo {
+  transition:
+    transform .5s cubic-bezier(.2,.8,.2,1),
+    filter .5s ease;
+}
+
+.product-card:hover .card-photo,
+.note-card:hover .card-photo,
+.resource-card:hover .resource-photo {
+  transform: scale(1.045);
+  filter: brightness(1.08);
+}
+
+.member-card:hover .member-photo {
+  transform: scale(1.08) rotate(2deg);
+}
+
+/* ---------- PRODUCT ICON ---------- */
+
+.product-icon,
+.detail-icon,
+.resource-icon {
+  transition: transform .4s ease, box-shadow .4s ease;
+}
+
+.product-card:hover .product-icon,
+.resource-card:hover .resource-icon {
+  transform: scale(1.04);
+}
+
+/* ---------- WISHLIST ---------- */
+
+.heart {
+  transition:
+    transform .25s ease,
+    background .25s ease;
+}
+
+.heart:hover {
+  transform: scale(1.14);
+  background: rgba(255,45,126,.18);
+}
+
+.heart:active {
+  animation: utHeart .35s ease;
+}
+
+@keyframes utHeart {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.4);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ---------- TAGS ---------- */
+
+.tag,
+.verified,
+.available,
+.busy {
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.tag:hover,
+.verified:hover,
+.available:hover,
+.busy:hover {
+  transform: translateY(-2px);
+}
+
+/* ---------- SEARCH / INPUT ---------- */
+
+.toolbar input,
+.toolbar select,
+.form input,
+.form select,
+.form textarea {
+  transition:
+    border-color .25s ease,
+    box-shadow .25s ease,
+    transform .25s ease;
+}
+
+.toolbar input:focus,
+.toolbar select:focus,
+.form input:focus,
+.form select:focus,
+.form textarea:focus {
+  border-color: rgba(255,45,126,.55);
+  box-shadow:
+    0 0 0 3px rgba(255,45,126,.08),
+    0 8px 25px rgba(0,0,0,.12);
+  transform: translateY(-1px);
+}
+
+/* ---------- FILTER CHIPS ---------- */
+
+.chips button,
+.resource-categories button {
+  transition:
+    transform .25s ease,
+    background .25s ease,
+    border-color .25s ease;
+}
+
+.chips button:hover,
+.resource-categories button:hover {
+  transform: translateY(-3px);
+}
+
+.chips button.selected,
+.resource-categories button.selected {
+  box-shadow: 0 7px 22px rgba(255,45,126,.08);
+}
+
+/* ---------- METRICS ---------- */
+
+.metric {
+  position: relative;
+  overflow: hidden;
+}
+
+.metric::after {
+  content: "";
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  right: -45px;
+  top: -45px;
+  background: rgba(255,45,126,.08);
+  filter: blur(12px);
+  transition: transform .4s ease;
+}
+
+.metric:hover {
+  transform: translateY(-7px) scale(1.015);
+}
+
+.metric:hover::after {
+  transform: scale(1.7);
+}
+
+.metric b {
+  transition: transform .3s ease;
+}
+
+.metric:hover b {
+  transform: scale(1.06);
+}
+
+/* ---------- AI CENTER ---------- */
+
+.ai-card:hover .ai-icon {
+  animation: utAiIcon .65s ease;
+}
+
+@keyframes utAiIcon {
+  0% {
+    transform: scale(1) rotate(0);
+  }
+  40% {
+    transform: scale(1.25) rotate(-8deg);
+  }
+  70% {
+    transform: scale(.95) rotate(5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+
+/* ---------- BUSINESS / PRICING ---------- */
+
+.business-card:hover {
+  transform: translateY(-8px) scale(1.01);
+}
+
+.featured-price {
+  animation:
+    utCardReveal .65s both,
+    utFeaturedGlow 3s ease-in-out infinite;
+}
+
+@keyframes utFeaturedGlow {
+  0%,100% {
+    box-shadow:
+      0 0 0 1px rgba(255,45,126,.28),
+      0 15px 45px rgba(255,45,126,.08);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255,45,126,.5),
+      0 18px 55px rgba(255,45,126,.18);
+  }
+}
+
+/* ---------- DASHBOARD ---------- */
+
+.dash-profile {
+  animation: utProfileIn .7s both;
+}
+
+.dash-stats .metric:nth-child(1) {
+  animation-delay: .08s;
+}
+
+.dash-stats .metric:nth-child(2) {
+  animation-delay: .16s;
+}
+
+.dash-stats .metric:nth-child(3) {
+  animation-delay: .24s;
+}
+
+.dash-stats .metric:nth-child(4) {
+  animation-delay: .32s;
+}
+
+@keyframes utProfileIn {
+  from {
+    opacity: 0;
+    transform: translateX(-25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ---------- AVATAR ---------- */
+
+.avatar {
+  transition:
+    transform .35s ease,
+    box-shadow .35s ease;
+}
+
+.dash-profile:hover .avatar,
+.member-card:hover .avatar {
+  transform: scale(1.08);
+  box-shadow:
+    0 0 0 4px rgba(255,45,126,.08),
+    0 0 25px rgba(255,45,126,.12);
+}
+
+/* ---------- MODAL ---------- */
+
+.modal-overlay {
+  animation: utOverlay .22s ease both;
+  backdrop-filter: blur(6px);
+}
+
+.modal {
+  animation: utModal .42s cubic-bezier(.2,.8,.2,1) both;
+}
+
+@keyframes utOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes utModal {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-close:hover {
+  transform: rotate(90deg) scale(1.08);
+}
+
+/* ---------- OTP INPUT ---------- */
+
+.form input[name="otp"] {
+  letter-spacing: 8px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.form input[name="otp"]:focus {
+  box-shadow:
+    0 0 0 4px rgba(255,45,126,.08),
+    0 0 25px rgba(255,45,126,.10);
+}
+
+/* ---------- TOAST ---------- */
+
+.toast {
+  animation: utToast .45s cubic-bezier(.2,.8,.2,1) both;
+}
+
+@keyframes utToast {
+  from {
+    opacity: 0;
+    transform: translate(-50%,20px) scale(.92);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%,0) scale(1);
+  }
+}
+
+/* ---------- SIDEBAR ---------- */
+
+.sidebar-overlay {
+  animation: utOverlay .2s ease both;
+}
+
+.sidebar {
+  animation: utSidebar .38s cubic-bezier(.2,.8,.2,1) both;
+}
+
+@keyframes utSidebar {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.sidebar-links button {
+  animation: utSidebarItem .4s both;
+}
+
+.sidebar-links button:nth-child(1) { animation-delay:.05s; }
+.sidebar-links button:nth-child(2) { animation-delay:.08s; }
+.sidebar-links button:nth-child(3) { animation-delay:.11s; }
+.sidebar-links button:nth-child(4) { animation-delay:.14s; }
+.sidebar-links button:nth-child(5) { animation-delay:.17s; }
+.sidebar-links button:nth-child(6) { animation-delay:.20s; }
+.sidebar-links button:nth-child(7) { animation-delay:.23s; }
+.sidebar-links button:nth-child(8) { animation-delay:.26s; }
+
+@keyframes utSidebarItem {
+  from {
+    opacity: 0;
+    transform: translateX(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ---------- FOOTER ---------- */
+
+footer {
+  animation: utFooter .8s ease both;
+}
+
+footer span {
+  transition: transform .25s ease, color .25s ease;
+}
+
+footer span:hover {
+  transform: translateX(5px);
+  color: #ff659d;
+}
+
+@keyframes utFooter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---------- LIGHT MODE SUPPORT ---------- */
+
+.light-mode .orbit-card:hover,
+.light-mode .feature-card:hover,
+.light-mode .product-card:hover,
+.light-mode .note-card:hover,
+.light-mode .resource-card:hover,
+.light-mode .member-card:hover,
+.light-mode .metric:hover,
+.light-mode .ai-card:hover,
+.light-mode .business-card:hover,
+.light-mode .price-card:hover {
+  box-shadow:
+    0 20px 45px rgba(20,20,40,.10),
+    0 0 25px rgba(255,45,126,.06);
+}
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 650px) {
+
+  .hero-copy {
+    animation-duration: .7s;
+  }
+
+  .hero-logo {
+    animation:
+      utLogoFloat 5s ease-in-out infinite,
+      utLogoPulse 4s ease-in-out infinite;
+  }
+
+  .orbit-card:hover {
+    transform: scale(1.02) !important;
+  }
+
+  .product-card:hover,
+  .note-card:hover,
+  .resource-card:hover,
+  .member-card:hover,
+  .ai-card:hover,
+  .business-card:hover,
+  .price-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .feature-card:hover {
+    transform: translateY(-5px);
+  }
+}
+
+/* ---------- ACCESSIBILITY ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+}

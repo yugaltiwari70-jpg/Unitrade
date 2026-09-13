@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 
 const User = require("../models/User");
 const PendingSignup = require("../models/PendingSignup");
@@ -10,7 +11,23 @@ const router = express.Router();
 
 
 // =========================================================
-// EMAIL CONFIGURATION - BREVO HTTP API
+// EMAIL CONFIGURATION - GMAIL SMTP
+// =========================================================
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: Number(process.env.SMTP_PORT || 587),
+  secure: false,
+
+  auth: {
+    user: process.env.SMTP_FROM,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+
+// =========================================================
+// SEND OTP EMAIL
 // =========================================================
 
 async function sendOtpEmail(email, otp, type = "login") {
@@ -26,42 +43,27 @@ async function sendOtpEmail(email, otp, type = "login") {
 
 
   // Check required environment variables
-  if (!process.env.BREVO_API_KEY) {
-    throw new Error("BREVO_API_KEY is missing");
+
+  if (!process.env.SMTP_FROM) {
+    throw new Error("SMTP_FROM is missing");
   }
 
-  if (!process.env.BREVO_SENDER_EMAIL) {
-    throw new Error("BREVO_SENDER_EMAIL is missing");
+  if (!process.env.SMTP_PASS) {
+    throw new Error("SMTP_PASS is missing");
   }
 
 
-  // Send email using Brevo HTTPS API
-  const response = await fetch(
-    "https://api.brevo.com/v3/smtp/email",
-    {
-      method: "POST",
+  // Send email using Gmail SMTP
 
-      headers: {
-        accept: "application/json",
-        "api-key": process.env.BREVO_API_KEY,
-        "content-type": "application/json",
-      },
+  try {
+    const info = await transporter.sendMail({
+      from: `"UniTrade" <${process.env.SMTP_FROM}>`,
 
-      body: JSON.stringify({
-        sender: {
-          name: "UniTrade",
-          email: process.env.BREVO_SENDER_EMAIL,
-        },
+      to: email,
 
-        to: [
-          {
-            email: email,
-          },
-        ],
+      subject: subject,
 
-        subject: subject,
-
-        textContent: `
+      text: `
 ${heading}
 
 Your UniTrade OTP is: ${otp}
@@ -72,12 +74,13 @@ If you did not request this, you can safely ignore this email.
 
 UniTrade
 Student Welfare & Resource Sharing Platform
-        `.trim(),
+      `.trim(),
 
-        htmlContent: `
+      html: `
 <!DOCTYPE html>
 
 <html>
+
 <head>
   <meta charset="UTF-8">
   <title>${subject}</title>
@@ -163,36 +166,30 @@ Student Welfare & Resource Sharing Platform
   </div>
 
 </body>
+
 </html>
-        `,
-      }),
-    }
-  );
+      `,
+    });
 
 
-  // Read response from Brevo
-  const responseText = await response.text();
+    console.log(
+      "OTP email sent successfully:",
+      info.messageId
+    );
 
+    return info;
 
-  if (!response.ok) {
+  } catch (error) {
+
     console.error(
-      "Brevo email error:",
-      response.status,
-      responseText
+      "Gmail SMTP email error:",
+      error
     );
 
     throw new Error(
-      `Brevo email failed: ${response.status}`
+      `Gmail email failed: ${error.message}`
     );
   }
-
-
-  console.log(
-    "OTP email sent successfully:",
-    responseText
-  );
-
-  return responseText;
 }
 
 
@@ -270,6 +267,7 @@ async function requestRegisterOtp(req, res) {
 
 
     // Required fields
+
     if (
       !name ||
       !normalizedEmail ||
@@ -283,6 +281,7 @@ async function requestRegisterOtp(req, res) {
 
 
     // Password validation
+
     if (password.length < 6) {
       return res.status(400).json({
         message:
@@ -292,6 +291,7 @@ async function requestRegisterOtp(req, res) {
 
 
     // Check existing verified account
+
     const existingUser =
       await User.findOne({
         email: normalizedEmail,
@@ -310,17 +310,20 @@ async function requestRegisterOtp(req, res) {
 
 
     // Hash password
+
     const hashedPassword =
       await bcrypt.hash(password, 10);
 
 
     // Generate OTP
+
     const otp = generateOtp();
 
     const otpHash = hashOtp(otp);
 
 
     // OTP valid for 5 minutes
+
     const otpExpiresAt =
       new Date(
         Date.now() + 5 * 60 * 1000
@@ -328,6 +331,7 @@ async function requestRegisterOtp(req, res) {
 
 
     // Store pending signup
+
     await PendingSignup.findOneAndUpdate(
       {
         email: normalizedEmail,
@@ -364,6 +368,7 @@ async function requestRegisterOtp(req, res) {
 
 
     // Send OTP
+
     await sendOtpEmail(
       normalizedEmail,
       otp,
@@ -393,6 +398,7 @@ async function requestRegisterOtp(req, res) {
 
 
 // New registration OTP endpoint
+
 router.post(
   "/request-register-otp",
   requestRegisterOtp
@@ -400,6 +406,7 @@ router.post(
 
 
 // Old register endpoint
+
 router.post(
   "/register",
   requestRegisterOtp
@@ -424,6 +431,7 @@ router.post(
 
 
       // Validate
+
       if (
         !email ||
         !/^\d{6}$/.test(otp)
@@ -436,6 +444,7 @@ router.post(
 
 
       // Find pending signup
+
       const pending =
         await PendingSignup.findOne({
           email,
@@ -451,6 +460,7 @@ router.post(
 
 
       // Maximum attempts
+
       if (
         pending.otpAttempts >= 5
       ) {
@@ -468,6 +478,7 @@ router.post(
 
 
       // Check expiry
+
       if (
         !pending.otpExpiresAt ||
         pending.otpExpiresAt.getTime() <
@@ -487,11 +498,13 @@ router.post(
 
 
       // Hash submitted OTP
+
       const submittedHash =
         hashOtp(otp);
 
 
       // Compare
+
       if (
         submittedHash !==
         pending.otpHash
@@ -510,6 +523,7 @@ router.post(
 
 
       // Check if account appeared meanwhile
+
       const existingUser =
         await User.findOne({
           email,
@@ -522,6 +536,7 @@ router.post(
       if (existingUser) {
 
         // Existing verified account
+
         if (existingUser.isVerified) {
 
           await PendingSignup.deleteOne({
@@ -537,6 +552,7 @@ router.post(
 
 
         // Update old unverified account
+
         existingUser.name =
           pending.name;
 
@@ -559,6 +575,7 @@ router.post(
       } else {
 
         // Create account
+
         user =
           await User.create({
 
@@ -573,17 +590,20 @@ router.post(
             course: pending.course,
 
             isVerified: true,
+
           });
       }
 
 
       // Delete pending signup
+
       await PendingSignup.deleteOne({
         _id: pending._id,
       });
 
 
       // Create token
+
       const token =
         createToken(user);
 
@@ -597,6 +617,7 @@ router.post(
 
         user:
           publicUser(user),
+
       });
 
     } catch (error) {
@@ -636,6 +657,7 @@ router.post(
 
 
       // Validate
+
       if (
         !email ||
         !password
@@ -648,6 +670,7 @@ router.post(
 
 
       // Find user
+
       const user =
         await User.findOne({
           email,
@@ -663,6 +686,7 @@ router.post(
 
 
       // Check password
+
       const passwordMatch =
         await bcrypt.compare(
           password,
@@ -679,6 +703,7 @@ router.post(
 
 
       // Generate OTP
+
       const otp =
         generateOtp();
 
@@ -688,6 +713,7 @@ router.post(
 
 
       // OTP valid for 5 minutes
+
       const otpExpiresAt =
         new Date(
           Date.now() + 5 * 60 * 1000
@@ -695,6 +721,7 @@ router.post(
 
 
       // Save OTP
+
       user.loginOtpHash =
         otpHash;
 
@@ -709,6 +736,7 @@ router.post(
 
 
       // Send OTP
+
       await sendOtpEmail(
         email,
         otp,
@@ -758,6 +786,7 @@ router.post(
 
 
       // Validate
+
       if (
         !email ||
         !/^\d{6}$/.test(otp)
@@ -770,6 +799,7 @@ router.post(
 
 
       // Find user
+
       const user =
         await User.findOne({
           email,
@@ -785,6 +815,7 @@ router.post(
 
 
       // Maximum attempts
+
       if (
         user.loginOtpAttempts >= 5
       ) {
@@ -807,13 +838,13 @@ router.post(
 
 
       // Check expiry
+
       if (
         !user.loginOtpHash ||
         !user.loginOtpExpiresAt ||
         user.loginOtpExpiresAt.getTime() <
           Date.now()
       ) {
-
         return res.status(400).json({
           message:
             "OTP has expired. Please request a new OTP.",
@@ -822,11 +853,13 @@ router.post(
 
 
       // Hash submitted OTP
+
       const submittedHash =
         hashOtp(otp);
 
 
       // Compare
+
       if (
         submittedHash !==
         user.loginOtpHash
@@ -845,10 +878,12 @@ router.post(
 
 
       // Email verified
+
       user.isVerified = true;
 
 
       // Clear OTP
+
       user.loginOtpHash = "";
 
       user.loginOtpExpiresAt = null;
@@ -860,6 +895,7 @@ router.post(
 
 
       // Create token
+
       const token =
         createToken(user);
 
@@ -873,6 +909,7 @@ router.post(
 
         user:
           publicUser(user),
+
       });
 
     } catch (error) {
@@ -953,6 +990,7 @@ router.post(
 
         user:
           publicUser(user),
+
       });
 
     } catch (error) {
